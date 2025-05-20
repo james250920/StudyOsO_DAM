@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.menfroyt.studyoso.R
 
-
 @Composable
 fun StudyOsoLandingScreen(
     navController: NavController
@@ -72,7 +71,7 @@ fun StudyOsoLandingScreen(
                 modifier = Modifier.padding(top = 16.dp)
             ) {
                 Button(
-                    onClick = { navController.navigate("registro") },
+                    onClick = { navController.navigate("register") },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003366)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -80,7 +79,7 @@ fun StudyOsoLandingScreen(
                 }
 
                 Button(
-                    onClick = { navController.navigate("home") },
+                    onClick = { navController.navigate("login") },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003366)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
