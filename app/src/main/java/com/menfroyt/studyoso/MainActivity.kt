@@ -18,7 +18,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            //contenido principal
+            StudyOsoTheme {
+
+
+            }
+
 
         }
     }
