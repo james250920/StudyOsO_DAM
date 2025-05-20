@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.menfroyt.studyoso.navigation.NavegacionApp
 import com.menfroyt.studyoso.ui.theme.StudyOsoTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,11 +20,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             StudyOsoTheme {
-
-
+                NavegacionApp()
             }
-
-
         }
     }
 }
