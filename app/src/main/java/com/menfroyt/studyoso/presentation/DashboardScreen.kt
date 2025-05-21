@@ -25,7 +25,7 @@ fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) ->
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF1A1A1A))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -33,21 +33,25 @@ fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) ->
         Icon(
             imageVector = Icons.Filled.Analytics,
             contentDescription = "Dashboard",
-            tint = Color(0xFF83B5FF),
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(64.dp)
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
         Text(
             text = "Pantalla de Dashboard",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = { onScreenSelected("Principal") },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF83B5FF),
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
             Text("Volver a Inicio")

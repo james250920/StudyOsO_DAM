@@ -24,7 +24,7 @@ fun ListaTareasScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF1A1A1A))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -32,14 +32,16 @@ fun ListaTareasScreen(modifier: Modifier = Modifier) {
         Icon(
             imageVector = Icons.Filled.FormatListNumbered,
             contentDescription = "Lista de Tareas",
-            tint = Color(0xFF83B5FF),
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(64.dp)
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
         Text(
             text = "Pantalla de Lista de Tareas",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }

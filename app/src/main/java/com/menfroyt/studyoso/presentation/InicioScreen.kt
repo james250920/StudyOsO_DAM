@@ -33,16 +33,14 @@ fun PrincipalScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF1A1A1A))
-            .padding(16.dp),
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp).padding(top = 16.dp),
+                .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             MenuItem(
@@ -61,9 +59,7 @@ fun PrincipalScreen(
                 onClick = { onScreenSelected("ListaTareas") }
             )
         }
-
-        Spacer(modifier = Modifier.padding(10.dp))
-
+        Spacer(modifier = Modifier.height(32.dp))
         Image(
             painter = painterResource(id = R.drawable.study),
             contentDescription = "Logo Study Oso",
@@ -71,13 +67,11 @@ fun PrincipalScreen(
                 .size(260.dp)
                 .align(Alignment.CenterHorizontally)
         )
-
-        Spacer(modifier = Modifier.padding(10.dp))
-
+        Spacer(modifier = Modifier.height(32.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp ).padding(bottom = 16.dp),
+                .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             MenuItem(
@@ -108,7 +102,6 @@ fun MenuItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(16.dp)
     ) {
         IconButton(
             onClick = onClick,
@@ -117,16 +110,15 @@ fun MenuItem(
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                tint = Color(0xFF83B5FF),
-                modifier = Modifier.size(64.dp)
+                tint = Color(0xFF69a5eb),
+                modifier = Modifier.size(50.dp)
             )
         }
         Text(
             text = text,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }
