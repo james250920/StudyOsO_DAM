@@ -3,6 +3,7 @@ package com.menfroyt.studyoso.presentation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -34,8 +35,9 @@ fun PrincipalScreen(
             .fillMaxSize()
             .background(Color(0xFF1A1A1A))
             .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         Row(
             modifier = Modifier
@@ -60,7 +62,7 @@ fun PrincipalScreen(
             )
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.padding(10.dp))
 
         Image(
             painter = painterResource(id = R.drawable.study),
@@ -70,7 +72,7 @@ fun PrincipalScreen(
                 .align(Alignment.CenterHorizontally)
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.padding(10.dp))
 
         Row(
             modifier = Modifier

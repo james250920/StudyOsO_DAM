@@ -56,9 +56,9 @@ fun StudyOsoLandingScreen(
             )
 
             Text(
-                text = "StudyOso es una aplicación que revoluciona tu organización " +
+                text = "StudyOso aplicación que revolucionara tu organización " +
                         "planificando las horas, asegurando que no te pierdas ninguna tarea " +
-                        "y calculando el GPA en segundos, ayudando a gestionar tu vida académica " +
+                        "y ayudando a gestionar tu vida académica " +
                         "de forma eficiente.",
                 color = Color.Black,
                 textAlign = TextAlign.Center,
