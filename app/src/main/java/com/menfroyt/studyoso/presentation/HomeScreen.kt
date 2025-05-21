@@ -36,13 +36,26 @@ fun Home(navController: NavController) {
     val scope = rememberCoroutineScope()
     var selectedScreen by remember { mutableStateOf("Principal") }
     var isDarkTheme by remember { mutableStateOf(true) }
-    var valueFondo by remember { mutableStateOf(Color.White) }
 
     MaterialTheme(
         colorScheme = if (isDarkTheme) {
-            darkColorScheme(MaterialTheme.colorScheme.primary)
+            darkColorScheme(
+                primary = Color(0xFF003366),
+                onPrimary = Color.White,
+                surface = Color(0xFF121212),
+                background = Color(0xFF121212),
+                onBackground = Color.White,
+                onSurface = Color.White
+            )
         } else {
-            lightColorScheme(MaterialTheme.colorScheme.onPrimary)
+            lightColorScheme(
+                primary = Color(0xFF003366),
+                onPrimary = Color.White,
+                surface = Color.White,
+                background = Color.White,
+                onBackground = Color.Black,
+                onSurface = Color.Black
+            )
         }
     ) {
         ModalNavigationDrawer(
@@ -50,7 +63,7 @@ fun Home(navController: NavController) {
             drawerContent = {
                 ModalDrawerSheet {
                     DrawerContent(
-                        selectedScreen = selectedScreen, // Pasar selectedScreen
+                        selectedScreen = selectedScreen,
                         onOptionSelected = { option ->
                             when (option) {
                                 "Perfil" -> selectedScreen = "Perfil"
@@ -99,139 +112,123 @@ fun Home(navController: NavController) {
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-
                             containerColor = MaterialTheme.colorScheme.primary,
                             titleContentColor = MaterialTheme.colorScheme.onPrimary
-
                         )
                     )
                 },
                 bottomBar = {
-                    BottomAppBar(
+                    NavigationBar(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-
-                        ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ) {
-                                NavigationBarItem(
-                                    selected = selectedScreen == "Dashboard",
-                                    onClick = { selectedScreen = "Dashboard" },
-                                    icon = {
-                                        Icon(
-                                            imageVector = Icons.Filled.Analytics,
-                                            contentDescription = "dashboard",
-                                            modifier = Modifier.size(30.dp)
-                                        )
-                                    },
-                                    label = { Text("Dashboard") },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFFFFA500),
-                                        unselectedIconColor = Color.White,
-                                        selectedTextColor = Color.White,
-                                        unselectedTextColor = Color.White
-                                    )
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        NavigationBarItem(
+                            selected = selectedScreen == "Dashboard",
+                            onClick = { selectedScreen = "Dashboard" },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Analytics,
+                                    contentDescription = "dashboard",
+                                    modifier = Modifier.size(30.dp)
                                 )
+                            },
+                            label = { Text("Dashboard") },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color(0xFFFFA500),
+                                unselectedIconColor = Color.White,
+                                selectedTextColor = Color.White,
+                                unselectedTextColor = Color.White
+                            )
+                        )
 
-                                NavigationBarItem(
-                                    selected = selectedScreen == "Pomodoro",
-                                    onClick = { selectedScreen = "Pomodoro" },
-                                    icon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.book_clock),
-                                            contentDescription = "pomodoro",
-                                            modifier = Modifier.size(30.dp)
-                                        )
-                                    },
-                                    label = { Text("Pomodoro") },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFFFFA500),
-                                        unselectedIconColor = Color.White,
-                                        selectedTextColor = Color.White,
-                                        unselectedTextColor = Color.White
-                                    )
+                        NavigationBarItem(
+                            selected = selectedScreen == "Pomodoro",
+                            onClick = { selectedScreen = "Pomodoro" },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.book_clock),
+                                    contentDescription = "pomodoro",
+                                    modifier = Modifier.size(30.dp)
                                 )
+                            },
+                            label = { Text("Pomodoro") },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color(0xFFFFA500),
+                                unselectedIconColor = Color.White,
+                                selectedTextColor = Color.White,
+                                unselectedTextColor = Color.White
+                            )
+                        )
 
-                                NavigationBarItem(
-                                    selected = selectedScreen == "Principal",
-                                    onClick = { selectedScreen = "Principal" },
-                                    icon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.home),
-                                            contentDescription = "home",
-                                            modifier = Modifier.size(30.dp)
-                                        )
-                                    },
-                                    label = { Text("Inicio") },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFFFFA500),
-                                        unselectedIconColor = Color.White,
-                                        selectedTextColor = Color.White,
-                                        unselectedTextColor = Color.White
-                                    )
+                        NavigationBarItem(
+                            selected = selectedScreen == "Principal",
+                            onClick = { selectedScreen = "Principal" },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.home),
+                                    contentDescription = "home",
+                                    modifier = Modifier.size(30.dp)
                                 )
+                            },
+                            label = { Text("Inicio") },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color(0xFFFFA500),
+                                unselectedIconColor = Color.White,
+                                selectedTextColor = Color.White,
+                                unselectedTextColor = Color.White
+                            )
+                        )
 
-                                NavigationBarItem(
-                                    selected = selectedScreen == "Calificaciones",
-                                    onClick = { selectedScreen = "Calificaciones" },
-                                    icon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.calificacion),
-                                            contentDescription = "calificaciones",
-                                            modifier = Modifier.size(30.dp)
-                                        )
-                                    },
-                                    label = { Text("Notas") },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFFFFA500),
-                                        unselectedIconColor = Color.White,
-                                        selectedTextColor = Color.White,
-                                        unselectedTextColor = Color.White
-                                    )
+                        NavigationBarItem(
+                            selected = selectedScreen == "Calificaciones",
+                            onClick = { selectedScreen = "Calificaciones" },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.calificacion),
+                                    contentDescription = "calificaciones",
+                                    modifier = Modifier.size(30.dp)
                                 )
+                            },
+                            label = { Text("Notas") },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color(0xFFFFA500),
+                                unselectedIconColor = Color.White,
+                                selectedTextColor = Color.White,
+                                unselectedTextColor = Color.White
+                            )
+                        )
 
-                                NavigationBarItem(
-                                    selected = selectedScreen == "ListaTareas",
-                                    onClick = { selectedScreen = "ListaTareas" },
-                                    icon = {
-                                        Icon(
-                                            imageVector = Icons.Filled.AddCircleOutline,
-                                            contentDescription = "lista_tareas",
-                                            modifier = Modifier.size(30.dp)
-                                        )
-                                    },
-                                    label = { Text("Lista Tareas") },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFFFFA500),
-                                        unselectedIconColor = Color.White,
-                                        selectedTextColor = Color.White,
-                                        unselectedTextColor = Color.White
-                                    )
+                        NavigationBarItem(
+                            selected = selectedScreen == "ListaTareas",
+                            onClick = { selectedScreen = "ListaTareas" },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Filled.AddCircleOutline,
+                                    contentDescription = "lista_tareas",
+                                    modifier = Modifier.size(30.dp)
                                 )
-                            }
-
-                        }
+                            },
+                            label = { Text("Tareas") },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Color(0xFFFFA500),
+                                unselectedIconColor = Color.White,
+                                selectedTextColor = Color.White,
+                                unselectedTextColor = Color.White
+                            )
+                        )
                     }
-                }
+                },
+                containerColor = MaterialTheme.colorScheme.background
             ) { innerPadding ->
                 when (selectedScreen) {
                     "Principal" -> PrincipalScreen(
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
-
                     "Dashboard" -> DashboardScreen(
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
-
                     "Perfil" -> PerfilScreen(Modifier.padding(innerPadding))
                     "Configuración" -> ConfiguracionScreen(Modifier.padding(innerPadding))
                     "Pomodoro" -> PomodoroScreen(Modifier.padding(innerPadding))
@@ -244,7 +241,6 @@ fun Home(navController: NavController) {
             }
         }
     }
-
 }
 
 
