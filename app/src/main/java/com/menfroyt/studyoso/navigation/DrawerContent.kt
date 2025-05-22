@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(280.dp)
             .fillMaxHeight()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
@@ -94,12 +94,12 @@ fun DrawerOption(
             imageVector = icon,
             contentDescription = "Ir a $text",
             tint = when (text) {
-                "Home" -> if (selectedScreen == "Principal") Color(0xFFFFA500) else MaterialTheme.colorScheme.primary
-                "Dashboard" -> if (selectedScreen == "Dashboard") Color(0xFFFFA500) else MaterialTheme.colorScheme.primary
-                "Perfil" -> if (selectedScreen == "Perfil") Color(0xFFFFA500) else MaterialTheme.colorScheme.primary
-                "Configuración" -> if (selectedScreen == "Configuración") Color(0xFFFFA500) else MaterialTheme.colorScheme.primary
-                "Pomodoro" -> if (selectedScreen == "Pomodoro") Color(0xFFFFA500) else MaterialTheme.colorScheme.primary
-                "Cerrar Sesión" -> MaterialTheme.colorScheme.primary // No resaltamos "Cerrar Sesión"
+                "Home" -> if (selectedScreen == "Principal") Color(0xFFFFA500) else Color(0xFF69a5eb)
+                "Dashboard" -> if (selectedScreen == "Dashboard") Color(0xFFFFA500) else Color(0xFF69a5eb)
+                "Perfil" -> if (selectedScreen == "Perfil") Color(0xFFFFA500) else Color(0xFF69a5eb)
+                "Configuración" -> if (selectedScreen == "Configuración") Color(0xFF69a5eb) else Color(0xFF69a5eb)
+                "Pomodoro" -> if (selectedScreen == "Pomodoro") Color(0xFFFFA500) else Color(0xFF69a5eb)
+                "Cerrar Sesión" -> Color(0xFF69a5eb) // No resaltamos "Cerrar Sesión"
                 else -> MaterialTheme.colorScheme.primary
             },
             modifier = Modifier.size(24.dp)

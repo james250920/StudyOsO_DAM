@@ -1,4 +1,4 @@
-package com.menfroyt.studyoso.presentation
+package com.menfroyt.studyoso.presentation.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
