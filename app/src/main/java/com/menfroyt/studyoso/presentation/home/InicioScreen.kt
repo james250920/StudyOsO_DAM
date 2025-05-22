@@ -45,8 +45,8 @@ fun PrincipalScreen(
         ) {
             MenuItem(
                 icon = Icons.Filled.AddToPhotos,
-                text = "Agregar cursos",
-                onClick = { onScreenSelected("AgregarCursos") }
+                text = "Cursos",
+                onClick = { onScreenSelected("lisCurso") }
             )
             MenuItem(
                 icon = Icons.Filled.EmojiEvents,
@@ -55,7 +55,7 @@ fun PrincipalScreen(
             )
             MenuItem(
                 icon = Icons.Filled.FormatListNumbered,
-                text = "Lista de tareas",
+                text = "Tareas",
                 onClick = { onScreenSelected("ListaTareas") }
             )
         }

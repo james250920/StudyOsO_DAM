@@ -75,7 +75,7 @@ fun StudyOsoLandingScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003366)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Registrarse", fontWeight = FontWeight.Bold)
+                    Text("Registrarse", fontWeight = FontWeight.Bold,color = Color.White)
                 }
 
                 Button(
@@ -83,7 +83,7 @@ fun StudyOsoLandingScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003366)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Ingresar", fontWeight = FontWeight.Bold)
+                    Text("Ingresar", fontWeight = FontWeight.Bold,color = Color.White)
                 }
             }
         }

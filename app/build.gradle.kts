@@ -133,8 +133,8 @@ dependencies {
     // Window for foldables
     implementation("androidx.window:window:1.2.0-beta03")
 
-    // Seguridad
-
+    //
+    implementation("com.godaddy.android.colorpicker:compose-color-picker:0.7.0")
 
     // Testing
     testImplementation(libs.junit)
