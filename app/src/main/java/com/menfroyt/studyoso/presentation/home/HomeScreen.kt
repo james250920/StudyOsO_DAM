@@ -1,12 +1,6 @@
-package com.menfroyt.studyoso.presentation
+package com.menfroyt.studyoso.presentation.home
 
-import android.R.id.primary
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -15,11 +9,9 @@ import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -28,6 +20,15 @@ import androidx.navigation.NavController
 import com.menfroyt.studyoso.R
 import kotlinx.coroutines.launch
 import com.menfroyt.studyoso.navigation.DrawerContent
+import com.menfroyt.studyoso.presentation.curso.AgregarCursosScreen
+import com.menfroyt.studyoso.presentation.components.CalendarioScreen
+import com.menfroyt.studyoso.presentation.calificación.CalificacionesScreen
+import com.menfroyt.studyoso.presentation.config.ConfiguracionScreen
+import com.menfroyt.studyoso.presentation.components.DashboardScreen
+import com.menfroyt.studyoso.presentation.tarea.ListaTareasScreen
+import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
+import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
+import com.menfroyt.studyoso.presentation.components.PomodoroScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

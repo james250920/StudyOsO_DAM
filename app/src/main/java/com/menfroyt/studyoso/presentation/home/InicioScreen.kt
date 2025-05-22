@@ -1,4 +1,4 @@
-package com.menfroyt.studyoso.presentation
+package com.menfroyt.studyoso.presentation.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
