@@ -29,6 +29,7 @@ import com.menfroyt.studyoso.presentation.tarea.ListaTareasScreen
 import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
 import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
 import com.menfroyt.studyoso.presentation.components.PomodoroScreen
+import com.menfroyt.studyoso.presentation.curso.DetalleCursoScreen
 import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -244,6 +245,12 @@ fun Home(navController: NavController) {
                     "lisCurso" -> ListCursoScreen(Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
+                    "DetalleCurso" -> DetalleCursoScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+
+
 
                 }
             }
