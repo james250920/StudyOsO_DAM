@@ -29,6 +29,7 @@ import com.menfroyt.studyoso.presentation.tarea.ListaTareasScreen
 import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
 import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
 import com.menfroyt.studyoso.presentation.components.PomodoroScreen
+import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -233,11 +234,17 @@ fun Home(navController: NavController) {
                     "Perfil" -> PerfilScreen(Modifier.padding(innerPadding))
                     "Configuración" -> ConfiguracionScreen(Modifier.padding(innerPadding))
                     "Pomodoro" -> PomodoroScreen(Modifier.padding(innerPadding))
-                    "AgregarCursos" -> AgregarCursosScreen(Modifier.padding(innerPadding))
+                    "AgregarCursos" -> AgregarCursosScreen(Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen })
+
                     "Calificaciones" -> CalificacionesScreen(Modifier.padding(innerPadding))
                     "ListaTareas" -> ListaTareasScreen(Modifier.padding(innerPadding))
                     "MatrizEisenhower" -> MatrizEisenhowerScreen(Modifier.padding(innerPadding))
                     "Calendario" -> CalendarioScreen(Modifier.padding(innerPadding))
+                    "lisCurso" -> ListCursoScreen(Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+
                 }
             }
         }
