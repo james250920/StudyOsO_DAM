@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Preview
@@ -57,6 +58,54 @@ fun ListCursoScreen(
             listOf(
                 Curso(
                     id = "1",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "2",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "3",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "4",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "5",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "6",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "7",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "8",
+                    nombre = "Programación",
+                    profesor = "Juan Pérez",
+                    aula = "205"
+                ),
+                Curso(
+                    id = "9",
                     nombre = "Programación",
                     profesor = "Juan Pérez",
                     aula = "205"
@@ -109,9 +158,9 @@ private fun CursoList(
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp)
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         items(
             count = cursos.size,
@@ -124,7 +173,6 @@ private fun CursoList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(8.dp)
             )
         }
     }
@@ -135,7 +183,7 @@ private fun EmptyState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -169,10 +217,17 @@ private fun CursoItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                imageVector = Icons.Filled.Book,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(end = 16.dp)
+            )
             Column {
                 Text(
                     text = curso.nombre,
@@ -187,6 +242,7 @@ private fun CursoItem(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.Filled.ChevronRight,
                 contentDescription = null,
