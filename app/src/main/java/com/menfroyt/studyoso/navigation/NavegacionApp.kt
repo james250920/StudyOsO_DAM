@@ -22,14 +22,7 @@ fun NavegacionApp(
         composable("register") { RegisterScreen(navController) }
         composable("home") { Home(navController) }
         composable("login") { LoginScreen(navController) }
-        composable("perfil") { PerfilScreen() }
-        composable("configuracion") { ConfiguracionScreen() }
-        composable("pomodoro") { PomodoroScreen() }
-        composable("AgregarCursos"){}
-        composable("Calificaciones") {}
-        composable("ListaTareas") {}
-        composable("MatrizEisenhower"){}
-        composable("Calendario") {}
+
     }
 }
 

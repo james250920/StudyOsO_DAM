@@ -20,9 +20,12 @@ import androidx.navigation.NavController
 import com.menfroyt.studyoso.R
 import kotlinx.coroutines.launch
 import com.menfroyt.studyoso.navigation.DrawerContent
+import com.menfroyt.studyoso.presentation.calificación.AgregarCalificacionScreen
 import com.menfroyt.studyoso.presentation.curso.AgregarCursosScreen
 import com.menfroyt.studyoso.presentation.components.CalendarioScreen
 import com.menfroyt.studyoso.presentation.calificación.CalificacionesScreen
+import com.menfroyt.studyoso.presentation.calificación.ListCalificacionScreen
+import com.menfroyt.studyoso.presentation.calificación.SimuladorCalificacionesScreen
 import com.menfroyt.studyoso.presentation.config.ConfiguracionScreen
 import com.menfroyt.studyoso.presentation.components.DashboardScreen
 import com.menfroyt.studyoso.presentation.tarea.ListaTareasScreen
@@ -184,7 +187,7 @@ fun Home(navController: NavController) {
 
                         NavigationBarItem(
                             selected = selectedScreen == "Calificaciones",
-                            onClick = { selectedScreen = "Calificaciones" },
+                            onClick = { selectedScreen = "ListCalificaciones" },
                             icon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.calificacion),
@@ -224,34 +227,61 @@ fun Home(navController: NavController) {
                 containerColor = MaterialTheme.colorScheme.background
             ) { innerPadding ->
                 when (selectedScreen) {
-                    "Principal" -> PrincipalScreen(
+                    "AgregarCalificacion" -> AgregarCalificacionScreen(
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "AgregarCursos" -> AgregarCursosScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "Calificaciones" -> CalificacionesScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "Calendario" -> CalendarioScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                    "Configuración" -> ConfiguracionScreen(
+                        modifier = Modifier.padding(innerPadding)
                     )
                     "Dashboard" -> DashboardScreen(
                         modifier = Modifier.padding(innerPadding),
-                        onScreenSelected = { screen -> selectedScreen = screen }
-                    )
-                    "Perfil" -> PerfilScreen(Modifier.padding(innerPadding))
-                    "Configuración" -> ConfiguracionScreen(Modifier.padding(innerPadding))
-                    "Pomodoro" -> PomodoroScreen(Modifier.padding(innerPadding))
-                    "AgregarCursos" -> AgregarCursosScreen(Modifier.padding(innerPadding),
-                        onScreenSelected = { screen -> selectedScreen = screen })
-
-                    "Calificaciones" -> CalificacionesScreen(Modifier.padding(innerPadding))
-                    "ListaTareas" -> ListaTareasScreen(Modifier.padding(innerPadding))
-                    "MatrizEisenhower" -> MatrizEisenhowerScreen(Modifier.padding(innerPadding))
-                    "Calendario" -> CalendarioScreen(Modifier.padding(innerPadding))
-                    "lisCurso" -> ListCursoScreen(Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
                     "DetalleCurso" -> DetalleCursoScreen(
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
-
-
-
+                    "ListaTareas" -> ListaTareasScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                    "ListCalificaciones" -> ListCalificacionScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "lisCurso" -> ListCursoScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "MatrizEisenhower" -> MatrizEisenhowerScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                    "Perfil" -> PerfilScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "Pomodoro" -> PomodoroScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                    "Principal" -> PrincipalScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "SimuladoCalificacion" -> SimuladorCalificacionesScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
                 }
             }
         }
