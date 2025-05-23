@@ -141,7 +141,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Dashboard") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -160,7 +160,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Pomodoro") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -179,7 +179,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Inicio") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -187,7 +187,7 @@ fun Home(navController: NavController) {
                         )
 
                         NavigationBarItem(
-                            selected = selectedScreen == "Calificaciones",
+                            selected = selectedScreen == "ListCalificaciones",
                             onClick = { selectedScreen = "ListCalificaciones" },
                             icon = {
                                 Icon(
@@ -198,7 +198,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Notas") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -217,7 +217,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Tareas") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White

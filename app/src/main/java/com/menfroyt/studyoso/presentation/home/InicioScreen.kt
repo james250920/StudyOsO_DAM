@@ -110,7 +110,7 @@ fun MenuItem(
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                tint = Color(0xFF69a5eb),
+                tint = Color(0xFF3355ff),
                 modifier = Modifier.size(50.dp)
             )
         }
