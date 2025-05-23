@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.menfroyt.studyoso.R
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ fun Home(navController: NavController) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var selectedScreen by remember { mutableStateOf("Principal") }
-    var isDarkTheme by remember { mutableStateOf(true) }
+    var isDarkTheme by remember { mutableStateOf(false) }
 
     MaterialTheme(
         colorScheme = if (isDarkTheme) {
@@ -140,7 +141,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Dashboard") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -159,7 +160,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Pomodoro") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -178,7 +179,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Inicio") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -186,7 +187,7 @@ fun Home(navController: NavController) {
                         )
 
                         NavigationBarItem(
-                            selected = selectedScreen == "Calificaciones",
+                            selected = selectedScreen == "ListCalificaciones",
                             onClick = { selectedScreen = "ListCalificaciones" },
                             icon = {
                                 Icon(
@@ -197,7 +198,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Notas") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -216,7 +217,7 @@ fun Home(navController: NavController) {
                             },
                             label = { Text("Tareas") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFFFFA500),
+                                selectedIconColor = Color(0xFF3355ff),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
