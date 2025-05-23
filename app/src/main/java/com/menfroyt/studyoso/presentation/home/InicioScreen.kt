@@ -51,7 +51,7 @@ fun PrincipalScreen(
             MenuItem(
                 icon = Icons.Filled.EmojiEvents,
                 text = "Calificaciones",
-                onClick = { onScreenSelected("Calificaciones") }
+                onClick = { onScreenSelected("ListCalificaciones") }
             )
             MenuItem(
                 icon = Icons.Filled.FormatListNumbered,

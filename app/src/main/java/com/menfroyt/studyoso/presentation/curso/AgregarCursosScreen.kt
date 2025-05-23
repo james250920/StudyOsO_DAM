@@ -152,7 +152,7 @@ private fun InputField(
             modifier = Modifier.padding(bottom = 4.dp),
             color = MaterialTheme.colorScheme.onBackground
         )
-        TextField(
+        OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label) },

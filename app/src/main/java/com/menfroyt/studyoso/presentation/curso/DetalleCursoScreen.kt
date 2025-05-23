@@ -55,7 +55,10 @@ fun DetalleCursoScreen(modifier: Modifier = Modifier,
         )
         CursoInfo()
         HorarioSection()
-        PruebasSection()
+        PruebasSection(
+            modifier = Modifier.fillMaxWidth(),
+            onScreenSelected = onScreenSelected
+        )
         PromedioTotal()
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -231,11 +234,12 @@ private fun HorarioCard(
 }
 
 @Composable
-private fun PruebasSection() {
+private fun PruebasSection(modifier: Modifier = Modifier,
+                           onScreenSelected: (String) -> Unit,) {
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -258,7 +262,12 @@ private fun PruebasSection() {
             }
         }
 
-        PruebaCard()
+        PruebaCard(
+            modifier = Modifier.fillMaxWidth(),
+            onScreenSelected = onScreenSelected
+
+
+        )
 
         DialogoAgregarPrueba(
             showDialog = showDialog,
@@ -271,9 +280,12 @@ private fun PruebasSection() {
 }
 
 @Composable
-private fun PruebaCard() {
+private fun PruebaCard(
+    modifier: Modifier = Modifier,
+    onScreenSelected: (String) -> Unit,
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer
         ),
@@ -294,7 +306,7 @@ private fun PruebaCard() {
             )
 
             Button(
-                onClick = { },
+                onClick = { onScreenSelected("AgregarCalificacion") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
