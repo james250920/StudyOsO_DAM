@@ -118,12 +118,12 @@ private fun CursoInfo() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Aula: 205",
+                text = "Profesor: Juan Pérez",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
-                text = "Profesor: Juan Pérez",
+                text = "Aula: 205",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
