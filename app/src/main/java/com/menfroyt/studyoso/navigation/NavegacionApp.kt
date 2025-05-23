@@ -14,7 +14,7 @@ import com.menfroyt.studyoso.presentation.pages.StudyOsoLandingScreen
 
 @Composable
 fun NavegacionApp(
-
+    isDarkTheme: Boolean = false
 ) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "landing") {
