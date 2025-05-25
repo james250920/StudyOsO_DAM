@@ -35,6 +35,7 @@ import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
 import com.menfroyt.studyoso.presentation.components.PomodoroScreen
 import com.menfroyt.studyoso.presentation.curso.DetalleCursoScreen
 import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
+import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -266,6 +267,10 @@ fun Home(navController: NavController) {
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
                     "MatrizEisenhower" -> MatrizEisenhowerScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "AddTaskScreen" -> AddTaskScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                     "Perfil" -> PerfilScreen(
