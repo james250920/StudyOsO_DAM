@@ -21,6 +21,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,10 +33,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.menfroyt.studyoso.R
 
 @Composable
-fun MatrizEisenhowerScreen(modifier: Modifier = Modifier) {
+fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {
+
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -49,7 +56,9 @@ fun MatrizEisenhowerScreen(modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
-                println("Botón 'Agregar tarea' presionado")
+                onScreenSelected(
+                    "AddTaskScreen"
+                )
             },
             modifier = Modifier
                 .fillMaxWidth() // Para que el botón ocupe todo el ancho
