@@ -23,7 +23,6 @@ fun NavegacionApp(
         composable("register") { RegisterScreen(navController) }
         composable("home") { Home(navController) }
         composable("login") { LoginScreen(navController) }
-        composable("AddTaskScreen") { AddTaskScreen() }
     }
 }
 

@@ -29,13 +29,13 @@ import com.menfroyt.studyoso.presentation.calificación.ListCalificacionScreen
 import com.menfroyt.studyoso.presentation.calificación.SimuladorCalificacionesScreen
 import com.menfroyt.studyoso.presentation.config.ConfiguracionScreen
 import com.menfroyt.studyoso.presentation.components.DashboardScreen
-import com.menfroyt.studyoso.presentation.tarea.ListaTareasScreen
 import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
 import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
 import com.menfroyt.studyoso.presentation.components.PomodoroScreen
 import com.menfroyt.studyoso.presentation.curso.DetalleCursoScreen
 import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
 import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
+import com.menfroyt.studyoso.presentation.tarea.ListTaskScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -207,8 +207,8 @@ fun Home(navController: NavController) {
                         )
 
                         NavigationBarItem(
-                            selected = selectedScreen == "ListaTareas",
-                            onClick = { selectedScreen = "ListaTareas" },
+                            selected = selectedScreen == "ListTaskScreen",
+                            onClick = { selectedScreen = "ListTaskScreen" },
                             icon = {
                                 Icon(
                                     imageVector = Icons.Filled.AddCircleOutline,
@@ -255,9 +255,6 @@ fun Home(navController: NavController) {
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
-                    "ListaTareas" -> ListaTareasScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
                     "ListCalificaciones" -> ListCalificacionScreen(
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
@@ -271,7 +268,12 @@ fun Home(navController: NavController) {
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
                     "AddTaskScreen" -> AddTaskScreen(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
+                    )
+                    "ListTaskScreen" -> ListTaskScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onScreenSelected = { screen -> selectedScreen = screen }
                     )
                     "Perfil" -> PerfilScreen(
                         modifier = Modifier.padding(innerPadding),

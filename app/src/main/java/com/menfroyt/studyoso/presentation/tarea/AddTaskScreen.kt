@@ -22,7 +22,7 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTaskScreen(modifier: Modifier = Modifier) {
+fun AddTaskScreen(modifier: Modifier = Modifier,onScreenSelected: (String) -> Unit) {
 
     val cursos = listOf("Matemática", "Física", "Química")
     var expandidoCurso by remember { mutableStateOf(false) }
@@ -142,13 +142,15 @@ fun AddTaskScreen(modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
-                // Lógica para agregar la tarea
+               onScreenSelected(
+                    "ListTaskScreen"
+                )
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
         ) {
-            Text(text = "Agregar")
+            Text(text = "Guardar")
         }
     }
 }
