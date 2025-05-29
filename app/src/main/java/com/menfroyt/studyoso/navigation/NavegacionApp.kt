@@ -11,6 +11,7 @@ import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
 import com.menfroyt.studyoso.presentation.components.PomodoroScreen
 import com.menfroyt.studyoso.presentation.auth.RegisterScreen
 import com.menfroyt.studyoso.presentation.pages.StudyOsoLandingScreen
+import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
 
 @Composable
 fun NavegacionApp(
@@ -22,7 +23,6 @@ fun NavegacionApp(
         composable("register") { RegisterScreen(navController) }
         composable("home") { Home(navController) }
         composable("login") { LoginScreen(navController) }
-
     }
 }
 
