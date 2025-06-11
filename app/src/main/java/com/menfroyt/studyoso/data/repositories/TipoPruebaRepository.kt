@@ -2,7 +2,7 @@ package com.menfroyt.studyoso.data.repositories
 
 import com.menfroyt.studyoso.data.dao.TipoPruebaDao
 import com.menfroyt.studyoso.data.entities.TipoPrueba
-import esan.mendoza.teststudyoso.domain.CursoConTiposPrueba
+import com.menfroyt.studyoso.domain.CursoConTiposPrueba
 import kotlinx.coroutines.flow.Flow
 
 class TipoPruebaRepository(private val dao: TipoPruebaDao) {
