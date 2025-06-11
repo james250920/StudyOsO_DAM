@@ -3,7 +3,7 @@ package com.menfroyt.studyoso.data.dao
 import androidx.room.Dao
 import androidx.room.*
 import com.menfroyt.studyoso.data.entities.TipoPrueba
-import esan.mendoza.teststudyoso.domain.CursoConTiposPrueba
+import com.menfroyt.studyoso.domain.CursoConTiposPrueba
 import kotlinx.coroutines.flow.Flow
 
 
