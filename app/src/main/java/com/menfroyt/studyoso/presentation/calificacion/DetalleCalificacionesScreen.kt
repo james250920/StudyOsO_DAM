@@ -1,4 +1,4 @@
-package com.menfroyt.studyoso.presentation.calificación
+package com.menfroyt.studyoso.presentation.calificacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -7,30 +7,84 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.menfroyt.studyoso.domain.TipoPrueba
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModelFactory
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.ViewModel.tipoPrueba.TipoPruebaViewModel
+import com.menfroyt.studyoso.ViewModel.tipoPrueba.TipoPruebaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.repositories.CalificacionRepository
+import com.menfroyt.studyoso.data.repositories.CursoRepository
+import com.menfroyt.studyoso.data.repositories.TipoPruebaRepository
+import kotlin.text.get
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {
+fun DetalleCalificacionesScreen(
+    modifier: Modifier = Modifier,
+    cursoId: Int,
+    onScreenSelected: (String) -> Unit
+) {
+    // Inicialización de dependencias
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+
+    // ViewModels y estados
+    val tipoPruebaRepo = remember { TipoPruebaRepository(db.TipoPruebaDao()) }
+    val tipoPruebaViewModel: TipoPruebaViewModel = viewModel(factory = TipoPruebaViewModelFactory(tipoPruebaRepo))
+    val tiposPrueba by tipoPruebaViewModel.tiposPrueba.collectAsState()
+
+    val calificacionRepo = remember { CalificacionRepository(db.CalificacionDao()) }
+    val calificacionViewModel: CalificacionViewModel = viewModel(factory = CalificacionViewModelFactory(calificacionRepo))
+    val calificaciones by calificacionViewModel.calificaciones.collectAsState()
+
+    val cursoRepository = remember { CursoRepository(db.CursoDao()) }
+    val cursoViewModel: CursoViewModel = viewModel(factory = CursoViewModelFactory(cursoRepository))
+    var nombreCurso by remember { mutableStateOf<String>("") }
+
+    // Efectos
+    LaunchedEffect(cursoId) {
+        tipoPruebaViewModel.cargarTiposPorCurso(cursoId)
+        calificacionViewModel.cargarCalificacionesPorCurso(cursoId)
+        val curso = cursoViewModel.getCursoById(cursoId)
+        nombreCurso = curso?.nombreCurso ?: ""
+    }
+
+    // Cálculos
+    val calPorTipo = tiposPrueba.associateWith { tipo ->
+        calificaciones.filter { it.idTipoPrueba == tipo.idTipoPrueba }
+    }
+
+    val promediosPorTipo = tiposPrueba.associate { tipo ->
+        tipo.nombreTipo to (calPorTipo[tipo]?.mapNotNull { it.calificacionObtenida }?.average()?.takeIf { !it.isNaN() } ?: 0.0)
+    }
+
+    val promedioFinal = tiposPrueba.sumOf { tipo ->
+        val promedioTipo = promediosPorTipo[tipo.nombreTipo] ?: 0.0
+        promedioTipo * (tipo.pesoTotal / 100.0)
+    }
+
+    // UI
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
     ) {
-        // Barra superior con elevación
+        // Barra superior
         Surface(
             modifier = Modifier.fillMaxWidth(),
             tonalElevation = 2.dp,
@@ -40,55 +94,50 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = "Programación",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-
-                }
-                Row(
+                IconButton(
+                    onClick = { onScreenSelected("ListCalificaciones") },
                     modifier = Modifier
-                        .padding(start = 8.dp)
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.End),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .size(32.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
                 ) {
-                    FilledTonalButton(
-                        onClick = { /* TODO */ },
-                        shape = RoundedCornerShape(6.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.EmojiEvents,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Actualizar")
-                    }
-                    Button(
-                        onClick = { onScreenSelected("AgregarCalificacion") },
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBackIosNew,
+                        contentDescription = "Regresar a lista",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
 
-                    }
+                Text(
+                    text = nombreCurso,
+                    style = MaterialTheme.typography.headlineSmallEmphasized,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                IconButton(
+                    onClick = { onScreenSelected("AgregarCalificacion") },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "añadir",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
         }
 
-        // Contenido desplazable
+        // Contenido con padding
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Card de distribución de notas
@@ -96,22 +145,15 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        "Distribución de Notas",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Distribución de Notas", style = MaterialTheme.typography.titleMedium)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        PesoItem("PCs", "20%")
-                        PesoItem("CLs", "20%")
-                        PesoItem("Ex. Parcial", "30%")
-                        PesoItem("Ex. Final", "30%")
+                        tiposPrueba.forEach { tipo ->
+                            PesoItem(tipo.nombreTipo, "${tipo.pesoTotal.toInt()}%")
+                        }
                     }
                 }
             }
@@ -121,22 +163,17 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        "Calificaciones Actuales",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                    NotaItem("PCs", "14", "14", "14", emoji = "🏆")
-                    NotaItem("CLs", "15", "14", "14", emoji = "🌟")
-                    NotaItem("Ex. Parcial", "16", emoji = "🎯")
-                    NotaItem("Ex. Final", "17", emoji = "🏅")
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Calificaciones Actuales", style = MaterialTheme.typography.titleMedium)
+                    tiposPrueba.forEach { tipo ->
+                        NotaItem(
+                            tipo.nombreTipo,
+                            *(calPorTipo[tipo]?.map { (it.calificacionObtenida?.toString() ?: "-") }?.toTypedArray() ?: arrayOf()),
+                            emoji = "⭐"
+                        )
+                    }
                     Button(
-                        onClick = {
-                            onScreenSelected("SimuladoCalificacion")
-                        },
+                        onClick = { onScreenSelected("SimuladoCalificacion/$cursoId") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp),
@@ -149,7 +186,6 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
                     ) {
                         Text("Simulador de notas")
                     }
-
                 }
             }
 
@@ -158,22 +194,15 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        "Promedios por Tipo",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Promedios por Tipo", style = MaterialTheme.typography.titleMedium)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        PromedioItem("PCs", "14.5")
-                        PromedioItem("CLs", "15.0")
-                        PromedioItem("Ex.P", "16.0")
-                        PromedioItem("Ex.F", "17.0")
+                        promediosPorTipo.forEach { (tipo, promedio) ->
+                            PromedioItem(tipo, String.format("%.2f", promedio))
+                        }
                     }
                 }
             }
@@ -182,9 +211,7 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Row(
                     modifier = Modifier
@@ -193,16 +220,13 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            "Promedio Final",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-
-                    }
                     Text(
-                        "15.5",
+                        "Promedio Final",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        String.format("%.2f", promedioFinal),
                         style = MaterialTheme.typography.displayMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -211,6 +235,7 @@ fun CalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (Strin
         }
     }
 }
+
 
 @Composable
 private fun PesoItem(titulo: String, peso: String) {

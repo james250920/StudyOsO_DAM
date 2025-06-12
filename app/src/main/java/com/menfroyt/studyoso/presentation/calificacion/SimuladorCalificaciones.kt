@@ -1,4 +1,4 @@
-package com.menfroyt.studyoso.presentation.calificación
+package com.menfroyt.studyoso.presentation.calificacion
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,55 +7,39 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.menfroyt.studyoso.domain.TipoPrueba
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.tipoPrueba.TipoPruebaViewModel
+import com.menfroyt.studyoso.ViewModel.tipoPrueba.TipoPruebaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.TipoPrueba
+import com.menfroyt.studyoso.data.repositories.TipoPruebaRepository
 
 
 @Composable
-fun SimuladorCalificacionesScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {
-    var tipoPruebas = remember {
-        listOf(
-            TipoPrueba(
-                id = 1,
-                nombre = "PCs",
-                numPruebas = 3,
-                cursoId = 1,
-                peso = 0.20
-            ),
-            TipoPrueba(
-                id = 2,
-                nombre = "CLs",
-                numPruebas = 3,
-                cursoId = 1,
-                peso = 0.20
-            ),
-            TipoPrueba(
-                id = 3,
-                nombre = "Ex. Parcial",
-                numPruebas = 1,
-                cursoId = 1,
-                peso = 0.30
-            ),
-            TipoPrueba(
-                id = 4,
-                nombre = "Ex. Final",
-                numPruebas = 1,
-                cursoId = 1,
-                peso = 0.30
-            )
-        )
+fun SimuladorCalificacionesScreen(
+    modifier: Modifier = Modifier,
+    cursoId: Int,
+    onScreenSelected: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val tipoPruebaRepository = remember { TipoPruebaRepository(db.TipoPruebaDao()) }
+    val tipoPruebaViewModel: TipoPruebaViewModel = viewModel(factory = TipoPruebaViewModelFactory(tipoPruebaRepository))
+    val tiposPrueba by tipoPruebaViewModel.tiposPrueba.collectAsState()
+
+    // Cargar los tipos de prueba reales del curso
+    LaunchedEffect(cursoId) {
+        tipoPruebaViewModel.cargarTiposPorCurso(cursoId)
     }
 
-    // Estado para almacenar los promedios de cada tipo de prueba
     var promedios by remember { mutableStateOf(mapOf<Int, Double>()) }
 
     Column(
@@ -77,20 +61,15 @@ fun SimuladorCalificacionesScreen(modifier: Modifier = Modifier, onScreenSelecte
             ) {
                 Column {
                     Text(
-                        text = "Programación",
+                        text = "Simulador de Notas",
                         style = MaterialTheme.typography.headlineMedium
-                    )
-                    Text(
-                        text = "Simulador de notas",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(
-                        onClick = { onScreenSelected("Calificaciones") },
+                        onClick = { onScreenSelected("DetalleCalificaciones/$cursoId") },
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(
@@ -114,11 +93,11 @@ fun SimuladorCalificacionesScreen(modifier: Modifier = Modifier, onScreenSelecte
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            tipoPruebas.forEach { tipoPrueba ->
+            tiposPrueba.forEach { tipoPrueba ->
                 TipoPruebaCard(
                     tipoPrueba = tipoPrueba,
                     onPromedioCalculado = { promedio ->
-                        promedios = promedios + (tipoPrueba.id to promedio)
+                        promedios = promedios + (tipoPrueba.idTipoPrueba to promedio)
                     }
                 )
             }
@@ -133,7 +112,7 @@ private fun TipoPruebaCard(
     tipoPrueba: TipoPrueba,
     onPromedioCalculado: (Double) -> Unit
 ) {
-    var notas by remember { mutableStateOf(List(tipoPrueba.numPruebas) { "" }) }
+    var notas by remember { mutableStateOf(List(tipoPrueba.cantidadPruebas) { "" }) }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -149,7 +128,7 @@ private fun TipoPruebaCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = tipoPrueba.nombre,
+                    text = tipoPrueba.nombreTipo,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Surface(
@@ -157,7 +136,7 @@ private fun TipoPruebaCard(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "${(tipoPrueba.peso * 100).toInt()}%",
+                        text = "${tipoPrueba.pesoTotal}%",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -175,7 +154,7 @@ private fun TipoPruebaCard(
                         onValueChange = { newValue ->
                             if (newValue.isEmpty() || (newValue.toFloatOrNull() != null && newValue.toFloat() <= 20)) {
                                 notas = notas.toMutableList().also { it[index] = newValue }
-                                onPromedioCalculado(calcularPromedio(notas, tipoPrueba.peso))
+                                onPromedioCalculado(calcularPromedio(notas, tipoPrueba.pesoTotal, tipoPrueba.cantidadPruebas))
                             }
                         },
                         modifier = Modifier.weight(1f),
@@ -187,7 +166,7 @@ private fun TipoPruebaCard(
                 }
             }
 
-            val promedio = calcularPromedio(notas, tipoPrueba.peso)
+            val promedio = calcularPromedio(notas, tipoPrueba.pesoTotal, tipoPrueba.cantidadPruebas)
             if (promedio > 0) {
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer,
@@ -238,10 +217,10 @@ private fun PromedioFinalCard(promedios: Double) {
     }
 }
 
-private fun calcularPromedio(notas: List<String>, peso: Double): Double {
+// Se asume pesoTotal en porcentaje (ej. 20 para 20%).
+private fun calcularPromedio(notas: List<String>, pesoTotal: Double, cantidadPruebas: Int): Double {
     val notasValidas = notas.mapNotNull { it.toFloatOrNull() }
-    if (notasValidas.isEmpty()) return 0.0
-
-    val promedioParcial = notasValidas.sum() / notasValidas.size
-    return promedioParcial * peso
+    if (notasValidas.isEmpty() || cantidadPruebas == 0) return 0.0
+    val promedioParcial = notasValidas.sum() / cantidadPruebas
+    return promedioParcial * (pesoTotal / 100)
 }
