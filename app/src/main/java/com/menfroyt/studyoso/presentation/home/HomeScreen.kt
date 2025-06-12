@@ -16,26 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.menfroyt.studyoso.R
-import kotlinx.coroutines.launch
 import com.menfroyt.studyoso.navigation.DrawerContent
-import com.menfroyt.studyoso.presentation.calificación.AgregarCalificacionScreen
-import com.menfroyt.studyoso.presentation.curso.AgregarCursosScreen
-import com.menfroyt.studyoso.presentation.components.CalendarioScreen
-import com.menfroyt.studyoso.presentation.calificación.CalificacionesScreen
-import com.menfroyt.studyoso.presentation.calificación.ListCalificacionScreen
-import com.menfroyt.studyoso.presentation.calificación.SimuladorCalificacionesScreen
-import com.menfroyt.studyoso.presentation.config.ConfiguracionScreen
-import com.menfroyt.studyoso.presentation.components.DashboardScreen
-import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
-import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
-import com.menfroyt.studyoso.presentation.components.PomodoroScreen
-import com.menfroyt.studyoso.presentation.curso.DetalleCursoScreen
-import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
-import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
-import com.menfroyt.studyoso.presentation.tarea.ListTaskScreen
+import kotlinx.coroutines.launch
+import com.menfroyt.studyoso.R
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -207,8 +193,8 @@ fun Home(navController: NavController) {
                         )
 
                         NavigationBarItem(
-                            selected = selectedScreen == "ListTaskScreen",
-                            onClick = { selectedScreen = "ListTaskScreen" },
+                            selected = selectedScreen == "ListaTareas",
+                            onClick = { selectedScreen = "ListaTareas" },
                             icon = {
                                 Icon(
                                     imageVector = Icons.Filled.AddCircleOutline,
@@ -255,6 +241,9 @@ fun Home(navController: NavController) {
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
+                    "ListaTareas" -> ListaTareasScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
                     "ListCalificaciones" -> ListCalificacionScreen(
                         modifier = Modifier.padding(innerPadding),
                         onScreenSelected = { screen -> selectedScreen = screen }
@@ -264,16 +253,7 @@ fun Home(navController: NavController) {
                         onScreenSelected = { screen -> selectedScreen = screen }
                     )
                     "MatrizEisenhower" -> MatrizEisenhowerScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        onScreenSelected = { screen -> selectedScreen = screen }
-                    )
-                    "AddTaskScreen" -> AddTaskScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        onScreenSelected = { screen -> selectedScreen = screen }
-                    )
-                    "ListTaskScreen" -> ListTaskScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        onScreenSelected = { screen -> selectedScreen = screen }
+                        modifier = Modifier.padding(innerPadding)
                     )
                     "Perfil" -> PerfilScreen(
                         modifier = Modifier.padding(innerPadding),
@@ -295,7 +275,3 @@ fun Home(navController: NavController) {
         }
     }
 }
-
-
-
-

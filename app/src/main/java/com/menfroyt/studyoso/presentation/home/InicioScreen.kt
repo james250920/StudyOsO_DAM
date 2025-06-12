@@ -105,13 +105,13 @@ fun MenuItem(
     ) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(70.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = text,
                 tint = Color(0xFF3355ff),
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(65.dp)
             )
         }
         Text(
