@@ -1,7 +1,6 @@
-package com.menfroyt.studyoso.presentation.components
+package esan.mendoza.teststudyoso.presentation.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,35 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Dataset
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.menfroyt.studyoso.R
 
 @Composable
-fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {
-
-
+fun MatrizEisenhowerScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -50,62 +33,32 @@ fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (Str
             text = "Matriz de Eisenhower",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
-
-        Button(
-            onClick = {
-                onScreenSelected(
-                    "AddTaskScreen"
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth() // Para que el botón ocupe todo el ancho
-                .padding(vertical = 8.dp) // Añadir un poco de espacio vertical
-        ) {
-            Text("Agregar tarea")
-        }
-
-
 
         Row(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically // Centra la imagen y el cuadrante verticalmente
         ) {
-            Column(
-                modifier = Modifier.weight(1f), // La columna ocupa la mitad del espacio de la Row
-                horizontalAlignment = Alignment.CenterHorizontally // <--- AÑADE ESTO
-            ) {
-                // Cuadrante 1: Urgente e Importante
-                CuadranteMatriz(
-                    titulo = "Tienes que hacerlo",
-                    descripcion = "Urgente e Importante",
-                    color = Color(0xFFFF6B6B),
-                    //icon = Icons.Filled.Warning,
-                    modifier = Modifier
-                        .weight(1f) // Para que este cuadrante tome espacio vertical dentro de la Column
-                        .fillMaxWidth() // El cuadrante se expandirá al ancho de la Column
-                        .padding(2.dp),
-                    //icon = Icons.Filled.Warning,
-                    imageVector = painterResource(id = R.drawable.c1)
-                )
-            }
+            // Cuadrante 1: Urgente e Importante
+            CuadranteMatriz(
+                titulo = "Hacer",
+                descripcion = "Urgente e Importante",
+                color = Color(0xFFFF6B6B),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp)
+            )
 
             // Cuadrante 2: No Urgente e Importante
             CuadranteMatriz(
-                titulo = "Puedes decidir",
+                titulo = "Programar",
                 descripcion = "No Urgente e Importante",
                 color = Color(0xFF4ECDC4),
                 modifier = Modifier
-                    .weight(1f) // Cada cuadrante ocupa la mitad de la columna
-                    .fillMaxWidth()
-                    .padding(2.dp),
-                //icon = Icons.Filled.Dataset,
-                imageVector =painterResource(id = R.drawable.c2)
+                    .weight(1f)
+                    .padding(4.dp)
             )
         }
 
@@ -116,26 +69,22 @@ fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (Str
         ) {
             // Cuadrante 3: Urgente y No Importante
             CuadranteMatriz(
-                titulo = "Puedes delegar",
+                titulo = "Delegar",
                 descripcion = "Urgente y No Importante",
                 color = Color(0xFFFFBE0B),
                 modifier = Modifier
                     .weight(1f)
-                    .padding(4.dp),
-                //icon = Icons.Filled.Warning,
-                imageVector = painterResource(id = R.drawable.c3)
+                    .padding(4.dp)
             )
 
             // Cuadrante 4: No Urgente y No Importante
             CuadranteMatriz(
-                titulo = "Puedes postergarlo o eliminarlo",
+                titulo = "Eliminar",
                 descripcion = "No Urgente y No Importante",
                 color = Color(0xFF95A5A6),
                 modifier = Modifier
                     .weight(1f)
-                    .padding(4.dp),
-                //icon = Icons.Filled.Warning,
-                imageVector = painterResource(id = R.drawable.c4)
+                    .padding(4.dp)
             )
         }
     }
@@ -146,9 +95,7 @@ private fun CuadranteMatriz(
     titulo: String,
     descripcion: String,
     color: Color,
-    //icon: ImageVector? = null, // Parámetro opcional para el icono
-    modifier: Modifier = Modifier,
-    imageVector: Painter
+    modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
@@ -168,20 +115,12 @@ private fun CuadranteMatriz(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(modifier = Modifier.height(8.dp)) // Aumentar el espacio
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = descripcion,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp)) // Aumentar el espacio
-            Image(
-                painter = imageVector,
-                contentDescription = "Logo Study Oso",
-                modifier = Modifier
-                    .size(130.dp)
             )
         }
     }
