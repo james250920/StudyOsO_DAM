@@ -1,5 +1,4 @@
 package com.menfroyt.studyoso.presentation.tarea
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -280,6 +279,3 @@ fun AddTaskScreen(
         }
     }
 }
-
-
-

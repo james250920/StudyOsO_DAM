@@ -10,10 +10,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.FormatListNumberedRtl
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,7 +57,10 @@ fun DetalleCursoScreen(modifier: Modifier = Modifier,
         )
         CursoInfo()
         HorarioSection()
-        PruebasSection()
+        PruebasSection(
+            modifier = Modifier.fillMaxWidth(),
+            onScreenSelected = onScreenSelected
+        )
         PromedioTotal()
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -231,11 +236,12 @@ private fun HorarioCard(
 }
 
 @Composable
-private fun PruebasSection() {
+private fun PruebasSection(modifier: Modifier = Modifier,
+                           onScreenSelected: (String) -> Unit,) {
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -258,7 +264,12 @@ private fun PruebasSection() {
             }
         }
 
-        PruebaCard()
+        PruebaCard(
+            modifier = Modifier.fillMaxWidth(),
+            onScreenSelected = onScreenSelected
+
+
+        )
 
         DialogoAgregarPrueba(
             showDialog = showDialog,
@@ -271,9 +282,12 @@ private fun PruebasSection() {
 }
 
 @Composable
-private fun PruebaCard() {
+private fun PruebaCard(
+    modifier: Modifier = Modifier,
+    onScreenSelected: (String) -> Unit,
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer
         ),
@@ -294,7 +308,7 @@ private fun PruebaCard() {
             )
 
             Button(
-                onClick = { },
+                onClick = { onScreenSelected("AgregarCalificacion") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -399,6 +413,7 @@ private fun PromedioTotal() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DialogoAgregarHorario(
     showDialog: Boolean,
@@ -407,34 +422,101 @@ private fun DialogoAgregarHorario(
 ) {
     if (showDialog) {
         var state by remember { mutableStateOf(HorarioDialogState()) }
+        var showTimePickerInicio by remember { mutableStateOf(false) }
+        var showTimePickerFin by remember { mutableStateOf(false) }
 
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text("Agregar Horario") },
             text = {
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = state.dia,
                         onValueChange = { state = state.copy(dia = it) },
                         label = { Text("Día") },
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     OutlinedTextField(
                         value = state.horaInicio,
-                        onValueChange = { state = state.copy(horaInicio = it) },
-                        label = { Text("Hora inicio") },
-                        modifier = Modifier.fillMaxWidth()
+                        onValueChange = { },
+                        label = { Text("Agregar hora inicio") },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = { showTimePickerInicio = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Schedule,
+                                    contentDescription = "Seleccionar hora",
+                                    tint = Color(0xFFf60a0a)
+                                )
+                            }
+                        }
                     )
+
                     OutlinedTextField(
                         value = state.horaFin,
-                        onValueChange = { state = state.copy(horaFin = it) },
-                        label = { Text("Hora fin") },
-                        modifier = Modifier.fillMaxWidth()
+                        onValueChange = { },
+                        label = { Text("Agregar hora fin") },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = { showTimePickerFin = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Schedule,
+                                    contentDescription = "Seleccionar hora",
+                                    tint = Color(0xFFf60a0a)
+                                )
+                            }
+                        }
                     )
+
+                    if (showTimePickerInicio) {
+                        val timePickerState = rememberTimePickerState()
+                        TimePickerDialog(
+                            onCancel = { showTimePickerInicio = false },
+                            onConfirm = {
+                                val hora = timePickerState.hour
+                                val minuto = timePickerState.minute.toString().padStart(2, '0')
+                                val periodo = if (hora < 12) "AM" else "PM"
+                                val hora12 = when (hora) {
+                                    0 -> "12"
+                                    in 1..12 -> hora.toString()
+                                    else -> (hora - 12).toString()
+                                }.padStart(2, '0')
+                                state = state.copy(horaInicio = "$hora12:$minuto $periodo")
+                                showTimePickerInicio = false
+                            },
+                            content = { TimePicker(state = timePickerState) }
+                        )
+                    }
+
+                    if (showTimePickerFin) {
+                        val timePickerState = rememberTimePickerState()
+                        TimePickerDialog(
+                            onCancel = { showTimePickerFin = false },
+                            onConfirm = {
+                                val hora = timePickerState.hour
+                                val minuto = timePickerState.minute.toString().padStart(2, '0')
+                                val periodo = if (hora < 12) "AM" else "PM"
+                                val hora12 = when (hora) {
+                                    0 -> "12"
+                                    in 1..12 -> hora.toString()
+                                    else -> (hora - 12).toString()
+                                }.padStart(2, '0')
+                                state = state.copy(horaFin = "$hora12:$minuto $periodo")
+                                showTimePickerFin = false
+                            },
+                            content = { TimePicker(state = timePickerState) }
+                        )
+                    }
                 }
             },
             confirmButton = {
-                Button(onClick = { onConfirm(state) }) {
+                Button(
+                    onClick = { onConfirm(state) },
+                    enabled = state.isValid()
+                ) {
                     Text("Guardar")
                 }
             },
@@ -445,6 +527,29 @@ private fun DialogoAgregarHorario(
             }
         )
     }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun TimePickerDialog(
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("Aceptar")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onCancel) {
+                Text("Cancelar")
+            }
+        },
+        text = { content() }
+    )
 }
 
 @Composable

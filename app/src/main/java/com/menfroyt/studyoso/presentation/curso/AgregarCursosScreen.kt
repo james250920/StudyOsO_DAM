@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.godaddy.android.colorpicker.HsvColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,7 +151,7 @@ private fun InputField(
             modifier = Modifier.padding(bottom = 4.dp),
             color = MaterialTheme.colorScheme.onBackground
         )
-        TextField(
+        OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label) },
