@@ -1,4 +1,4 @@
-package esan.mendoza.teststudyoso.presentation.components
+package com.menfroyt.studyoso.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -25,7 +25,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import esan.mendoza.teststudyoso.R
+import com.menfroyt.studyoso.R
+
 
 @Composable
 fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {

@@ -1,6 +1,4 @@
-
 package com.menfroyt.studyoso.presentation.components
-
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,17 +25,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import esan.mendoza.teststudyoso.ViewModel.calificacion.CalificacionViewModel
-import esan.mendoza.teststudyoso.ViewModel.calificacion.CalificacionViewModelFactory
-import esan.mendoza.teststudyoso.ViewModel.curso.CursoViewModel
-import esan.mendoza.teststudyoso.ViewModel.curso.CursoViewModelFactory
-import esan.mendoza.teststudyoso.ViewModel.tarea.TareaViewModel
-import esan.mendoza.teststudyoso.ViewModel.tarea.TareaViewModelFactory
-import esan.mendoza.teststudyoso.data.db.AppDatabase
-import esan.mendoza.teststudyoso.data.entities.Tarea
-import esan.mendoza.teststudyoso.data.repositories.CalificacionRepository
-import esan.mendoza.teststudyoso.data.repositories.CursoRepository
-import esan.mendoza.teststudyoso.data.repositories.TareaRepository
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModelFactory
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModel
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Tarea
+import com.menfroyt.studyoso.data.repositories.CalificacionRepository
+import com.menfroyt.studyoso.data.repositories.CursoRepository
+import com.menfroyt.studyoso.data.repositories.TareaRepository
+
 
 @Composable
 fun DashboardScreen(

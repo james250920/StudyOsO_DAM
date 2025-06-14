@@ -1,5 +1,6 @@
 package com.menfroyt.studyoso.presentation.curso
 
+import android.graphics.Color.parseColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Preview
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -28,90 +27,45 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter.Companion.tint
-import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.menfroyt.studyoso.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Curso
+import com.menfroyt.studyoso.data.repositories.CursoRepository
 
-data class Curso(
-    val id: String = "",
-    val nombre: String,
-    val profesor: String,
-    val aula: String
-)
 
 @Composable
 fun ListCursoScreen(
     modifier: Modifier = Modifier,
     onScreenSelected: (String) -> Unit,
+    usuarioId: Int
 ) {
-    var cursos by remember {
-        mutableStateOf(
-            listOf(
-                Curso(
-                    id = "1",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "2",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "3",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "4",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "5",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "6",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "7",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "8",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                ),
-                Curso(
-                    id = "9",
-                    nombre = "Programación",
-                    profesor = "Juan Pérez",
-                    aula = "205"
-                )
-            )
-        )
+    val context = LocalContext.current
+
+    // Instancia DB, repo y ViewModel
+    val db = remember { AppDatabase.getInstance(context) }
+    val cursoRepository = remember { CursoRepository(db.CursoDao()) }
+    val cursoViewModel: CursoViewModel = viewModel(
+        factory = CursoViewModelFactory(cursoRepository)
+    )
+
+    // Observa los cursos del ViewModel
+    val cursos by cursoViewModel.cursos.collectAsState()
+
+    // Carga cursos para el usuarioId
+    LaunchedEffect(usuarioId) {
+        cursoViewModel.cargarCursos(usuarioId)
     }
 
     Box(
@@ -126,7 +80,9 @@ fun ListCursoScreen(
                 CursoList(
                     cursos = cursos,
                     onScreenSelected = onScreenSelected,
-                    //onCursoClick = onScreenSelected
+                    onDeleteCurso = { curso ->
+                        cursoViewModel.eliminarCurso(curso)
+                    },
                 )
             }
         }
@@ -148,11 +104,12 @@ fun ListCursoScreen(
     }
 }
 
+
 @Composable
 private fun CursoList(
     cursos: List<Curso>,
     onScreenSelected: (String) -> Unit,
-    //onCursoClick: (String) -> Unit,
+    onDeleteCurso: (Curso) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -164,12 +121,13 @@ private fun CursoList(
     ) {
         items(
             count = cursos.size,
-            key = { cursos[it].id }
+            key = { cursos[it].idCurso }
         ) { index ->
             val curso = cursos[index]
             CursoItem(
                 curso = curso,
-                onClick = { onScreenSelected("DetalleCurso") },
+                onClick = { onScreenSelected("DetalleCurso/${curso.idCurso}") },
+                onDelete = { onDeleteCurso(curso) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
@@ -206,6 +164,7 @@ private fun EmptyState() {
 private fun CursoItem(
     curso: Curso,
     onClick: () -> Unit,
+    onDelete: () -> Unit,  // Nuevo parámetro
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -217,36 +176,40 @@ private fun CursoItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(2.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Filled.Book,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = Color(parseColor(curso.color)),
                 modifier = Modifier
                     .size(80.dp)
                     .padding(end = 16.dp)
             )
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    text = curso.nombre,
+                    text = curso.nombreCurso,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = curso.profesor,
+                    text = curso.profesor.toString(),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = curso.aula,
+                    text = curso.aula.toString(),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = Icons.Filled.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Eliminar curso",
+                modifier = Modifier
+                    .clickable(onClick = onDelete)
+                    .padding(8.dp),
+                tint = MaterialTheme.colorScheme.error
             )
         }
     }

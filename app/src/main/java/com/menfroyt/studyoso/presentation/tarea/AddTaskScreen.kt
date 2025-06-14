@@ -14,16 +14,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModel
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Curso
+import com.menfroyt.studyoso.data.entities.Tarea
+import com.menfroyt.studyoso.data.repositories.CursoRepository
+import com.menfroyt.studyoso.data.repositories.TareaRepository
 
-import esan.mendoza.teststudyoso.ViewModel.curso.CursoViewModel
-import esan.mendoza.teststudyoso.ViewModel.curso.CursoViewModelFactory
-import esan.mendoza.teststudyoso.ViewModel.tarea.TareaViewModel
-import esan.mendoza.teststudyoso.ViewModel.tarea.TareaViewModelFactory
-import esan.mendoza.teststudyoso.data.db.AppDatabase
-import esan.mendoza.teststudyoso.data.entities.Curso
-import esan.mendoza.teststudyoso.data.entities.Tarea
-import esan.mendoza.teststudyoso.data.repositories.CursoRepository
-import esan.mendoza.teststudyoso.data.repositories.TareaRepository
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
