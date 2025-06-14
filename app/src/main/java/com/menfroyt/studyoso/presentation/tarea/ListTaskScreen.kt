@@ -1,83 +1,59 @@
 package com.menfroyt.studyoso.presentation.tarea
 
+
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModel
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Tarea
+import com.menfroyt.studyoso.data.repositories.TareaRepository
 
-data class Tarea(
-    val titulo: String,
-    val descripcion: String,
-    val prioridad: Prioridad
-)
-
-enum class Prioridad {
-    MUY_URGENTE, URGENTE, PROXIMO_A_VENCER, NO_URGENTE
-}
 
 @Composable
 fun ListTaskScreen(
     modifier: Modifier = Modifier,
     onScreenSelected: (String) -> Unit,
+    usuarioId: Int
 ) {
-    val listaTareas by remember {
-        mutableStateOf(
-            listOf(
-                Tarea("Entregar informe", "Informe de gestión mensual", Prioridad.MUY_URGENTE),
-                Tarea("Leer capítulo 3", "Libro de física cuántica", Prioridad.URGENTE),
-                Tarea("Estudiar para el examen", "Examen final en 3 días", Prioridad.PROXIMO_A_VENCER),
-                Tarea("Organizar escritorio", "Limpiar y archivar documentos", Prioridad.NO_URGENTE)
-            )
-        )
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val tareaRepository = remember { TareaRepository(db.TareaDao()) }
+    val tareaViewModel: TareaViewModel = viewModel(factory = TareaViewModelFactory(tareaRepository))
+
+    // Estado reactivo que obtiene las tareas del usuario
+    val tareas by tareaViewModel.tareas.collectAsState()
+
+    // Cargar las tareas del usuario en el ViewModel
+    LaunchedEffect(usuarioId) {
+        tareaViewModel.cargarTareasPorUsuario(usuarioId)
     }
 
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            if (listaTareas.isEmpty()) {
-                EmptyTaskState()
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                    items(listaTareas) { tarea ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            colors = CardDefaults.cardColors(containerColor = colorPorPrioridad(tarea.prioridad)),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                /*Text(
-                                    text = tarea.titulo,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color.Black
-                                ) */
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = tarea.descripcion,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Black
-                                )
-                            }
-                        }
-                    }
+    Box(modifier = modifier.fillMaxSize()) {
+        if (tareas.isEmpty()) {
+            EmptyState()
+        } else {
+            TaskList(
+                tareas = tareas,
+                onDeleteTask = { tareaViewModel.eliminarTarea(it) },
+                onTaskClick = { tarea ->
+                    // Aquí puedes implementar navegación a detalle o edición de tarea
+                    // Ejemplo: onScreenSelected("DetalleTarea/${tarea.idTarea}")
                 }
-            }
+            )
         }
 
         FloatingActionButton(
@@ -88,38 +64,100 @@ fun ListTaskScreen(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = "Agregar Tarea",
-                modifier = Modifier.size(24.dp)
-            )
+            Icon(Icons.Filled.Add, contentDescription = "Agregar Tarea")
         }
     }
 }
 
 @Composable
-private fun EmptyTaskState() {
+private fun EmptyState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "No hay tareas registradas",
             style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
 
 @Composable
-fun colorPorPrioridad(prioridad: Prioridad): Color {
-    return when (prioridad) {
-        Prioridad.MUY_URGENTE -> Color(0xFFFF8A80)       // rojo claro
-        Prioridad.URGENTE -> Color(0xFFFFCC80)            // naranja
-        Prioridad.PROXIMO_A_VENCER -> Color(0xFFFFF176)   // amarillo
-        Prioridad.NO_URGENTE -> Color(0xFFA5D6A7)         // verde
+private fun TaskList(
+    tareas: List<Tarea>,
+    onDeleteTask: (Tarea) -> Unit,
+    onTaskClick: (Tarea) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        items(tareas, key = { it.idTarea }) { tarea ->
+            TaskItem(
+                tarea = tarea,
+                onClick = { onTaskClick(tarea) },
+                onDelete = { onDeleteTask(tarea) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TaskItem(
+    tarea: Tarea,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = tarea.descripcion,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Importante: ${if (tarea.esImportante) "Sí" else "No"} | Urgente: ${if (tarea.esUrgente) "Sí" else "No"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Vence: ${tarea.fechaVencimiento}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Eliminar tarea",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
     }
 }
