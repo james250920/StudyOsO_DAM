@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 import com.menfroyt.studyoso.navigation.DrawerContent
 import kotlinx.coroutines.launch
 import com.menfroyt.studyoso.presentation.calificacion.AgregarCalificacionScreen
-
 import com.menfroyt.studyoso.R
 import com.menfroyt.studyoso.presentation.calificacion.DetalleCalificacionesScreen
 import com.menfroyt.studyoso.presentation.calificacion.ListCalificacionScreen
@@ -34,8 +33,10 @@ import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
 import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
 import com.menfroyt.studyoso.presentation.tarea.ListTaskScreen
 import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
-import esan.mendoza.teststudyoso.presentation.components.CalendarioScreen
-import esan.mendoza.teststudyoso.presentation.components.MatrizEisenhowerScreen
+import com.menfroyt.studyoso.presentation.components.CalendarioScreen
+import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
+import com.menfroyt.studyoso.presentation.components.pomodoro.PomodoroScreen
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,6 +1,5 @@
-package esan.mendoza.teststudyoso.presentation.components
+package com.menfroyt.studyoso.presentation.components
 
-import android.graphics.Color.parseColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,23 +23,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.viewmodel.compose.viewModel
-import esan.mendoza.teststudyoso.ViewModel.Horario.HorarioViewModel
-import esan.mendoza.teststudyoso.ViewModel.Horario.HorarioViewModelFactory
-import esan.mendoza.teststudyoso.ViewModel.curso.CursoViewModel
-import esan.mendoza.teststudyoso.ViewModel.curso.CursoViewModelFactory
-import esan.mendoza.teststudyoso.data.db.AppDatabase
-import esan.mendoza.teststudyoso.data.entities.Curso
-import esan.mendoza.teststudyoso.data.repositories.HorarioRepository
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.time.DayOfWeek
 import java.util.Locale
-import esan.mendoza.teststudyoso.data.entities.Horario
-import esan.mendoza.teststudyoso.data.repositories.CursoRepository
-import kotlin.collections.set
+import kotlin.text.get
 import kotlin.toString
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.ViewModel.Horario.HorarioViewModel
+import com.menfroyt.studyoso.ViewModel.Horario.HorarioViewModelFactory
+import com.menfroyt.studyoso.data.entities.Curso
+import com.menfroyt.studyoso.data.entities.Horario
+import com.menfroyt.studyoso.data.repositories.CursoRepository
+import com.menfroyt.studyoso.data.repositories.HorarioRepository
+import com.menfroyt.studyoso.data.db.AppDatabase
+
 
 enum class CalendarMode {
     MONTH, WEEK, DAY

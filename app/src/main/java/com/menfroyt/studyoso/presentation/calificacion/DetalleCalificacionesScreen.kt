@@ -29,7 +29,7 @@ import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.repositories.CalificacionRepository
 import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.TipoPruebaRepository
-import kotlin.text.get
+
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
