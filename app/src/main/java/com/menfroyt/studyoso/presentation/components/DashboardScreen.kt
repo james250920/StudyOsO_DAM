@@ -2,39 +2,73 @@ package com.menfroyt.studyoso.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModelFactory
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModel
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Tarea
+import com.menfroyt.studyoso.data.repositories.CalificacionRepository
+import com.menfroyt.studyoso.data.repositories.CursoRepository
+import com.menfroyt.studyoso.data.repositories.TareaRepository
+
 
 @Composable
-fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {
+fun DashboardScreen(
+    modifier: Modifier = Modifier,
+    onScreenSelected: (String) -> Unit,
+    usuarioId: Int
+) {
+    val context = LocalContext.current
+
+    // Instanciar DB y repositorios
+    val db = remember { AppDatabase.getInstance(context) }
+    val cursoRepository = remember { CursoRepository(db.CursoDao()) }
+    val tareaRepository = remember { TareaRepository(db.TareaDao()) }
+    val calificacionRepository = remember { CalificacionRepository(db.CalificacionDao()) }
+
+    // Instanciar ViewModels con Factory
+    val cursoViewModel: CursoViewModel = viewModel(factory = CursoViewModelFactory(cursoRepository))
+    val tareaViewModel: TareaViewModel = viewModel(factory = TareaViewModelFactory(tareaRepository))
+    val calificacionViewModel: CalificacionViewModel = viewModel(factory = CalificacionViewModelFactory(calificacionRepository))
+
+    // Observar estados
+    val cursos by cursoViewModel.cursos.collectAsState()
+    val tareas by tareaViewModel.tareas.collectAsState()
+    val calificaciones by calificacionViewModel.calificaciones.collectAsState()
+
+    // Cargar datos al iniciar
+    LaunchedEffect(usuarioId) {
+        cursoViewModel.cargarCursos(usuarioId)
+        tareaViewModel.cargarTareasPorUsuario(usuarioId)
+        calificacionViewModel.cargarCalificacionesPorUsuario(usuarioId)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -56,17 +90,20 @@ fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) ->
             item {
                 DashboardCard(
                     title = "Tareas Pendientes",
-                    value = "5",
+                    value = tareas.size.toString(),
                     icon = Icons.Filled.Assignment,
                     color = MaterialTheme.colorScheme.primary,
-                    onClick = { onScreenSelected("ListaTareas") }
+                    onClick = { onScreenSelected("ListTaskScreen") }
                 )
             }
 
             item {
                 DashboardCard(
                     title = "Promedio General",
-                    value = "4.2",
+                    value = if (calificaciones.isNotEmpty()) {
+                        val promedioGeneral = calificaciones.mapNotNull { it.calificacionObtenida }.average()
+                        String.format("%.2f", promedioGeneral)
+                    } else "0.0",
                     icon = Icons.Filled.Grade,
                     color = MaterialTheme.colorScheme.secondary,
                     onClick = { onScreenSelected("ListCalificaciones") }
@@ -76,7 +113,7 @@ fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) ->
             item {
                 DashboardCard(
                     title = "Cursos Activos",
-                    value = "7",
+                    value = cursos.size.toString(),
                     icon = Icons.Filled.School,
                     color = MaterialTheme.colorScheme.tertiary,
                     onClick = { onScreenSelected("lisCurso") }
@@ -85,8 +122,8 @@ fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) ->
 
             item {
                 DashboardCard(
-                    title = "Tiempo Estudiado",
-                    value = "2h 30m",
+                    title = "Pomodoros Completados",
+                    value = "0", // Aquí puedes agregar lógica para contar pomodoros si tienes datos
                     icon = Icons.Filled.Timer,
                     color = MaterialTheme.colorScheme.error,
                     onClick = { onScreenSelected("Pomodoro") }
@@ -98,7 +135,8 @@ fun DashboardScreen(modifier: Modifier = Modifier, onScreenSelected: (String) ->
 
         ProximasTareasCard(
             modifier = Modifier.fillMaxWidth(),
-            onVerMasClick = { onScreenSelected("ListaTareas") }
+            tareas = tareas,
+            onVerMasClick = { onScreenSelected("ListTaskScreen") }
         )
     }
 }
@@ -148,6 +186,7 @@ private fun DashboardCard(
 @Composable
 private fun ProximasTareasCard(
     modifier: Modifier = Modifier,
+    tareas: List<Tarea>,
     onVerMasClick: () -> Unit
 ) {
     Card(
@@ -176,18 +215,20 @@ private fun ProximasTareasCard(
             LazyColumn(
                 modifier = Modifier.height(200.dp)
             ) {
-                items(3) {
+                items(count = minOf(tareas.size, 3)) { index ->
+                    val tarea = tareas[index]
                     ListItem(
-                        headlineContent = { Text("Tarea ${it + 1}") },
-                        supportingContent = { Text("Fecha de entrega") },
+                        headlineContent = { Text(text = tarea.descripcion) },
+                        supportingContent = { Text(text = tarea.fechaVencimiento ?: "") },
                         leadingContent = {
                             Icon(
-                                Icons.Filled.Assignment,
+                                imageVector = Icons.Filled.Checklist,
                                 contentDescription = null
                             )
                         }
                     )
                 }
+
             }
         }
     }

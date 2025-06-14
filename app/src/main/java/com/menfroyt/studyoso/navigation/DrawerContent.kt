@@ -11,14 +11,21 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.menfroyt.studyoso.presentation.auth.SessionManager
+
 
 @Composable
-fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit) {
+fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
+                  ) {
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
     Column(
         modifier = Modifier
             .width(280.dp)
@@ -63,7 +70,10 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit) {
             text = "Cerrar Sesión",
             icon = Icons.Filled.Output,
             selectedScreen = selectedScreen,
-            onClick = { onOptionSelected("Cerrar Sesión") }
+            onClick = {
+                sessionManager.endSession()
+                onOptionSelected("Cerrar Sesión")
+            }
         )
 
         Spacer(modifier = Modifier.weight(1f))
