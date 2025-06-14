@@ -11,23 +11,44 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Curso
+import com.menfroyt.studyoso.data.repositories.CursoRepository
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgregarCursosScreen(
     modifier: Modifier = Modifier,
-    onScreenSelected: (String) -> Unit
+    onScreenSelected: (String) -> Unit,
+    usuarioId: Int
 ) {
+
+    val modalidades = listOf(
+        "Presencial", "Virtual", "Híbrido"
+    )
+    var expandedModalidad by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val cursoRepository = remember { CursoRepository(db.CursoDao()) }
+    val cursoViewModel: CursoViewModel = viewModel(
+        factory = CursoViewModelFactory(cursoRepository)
+    )
+
     val scrollState = rememberScrollState()
     var nombreCurso by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(Color.Red) }
@@ -35,32 +56,33 @@ fun AgregarCursosScreen(
     var creditos by remember { mutableStateOf("") }
     var aula by remember { mutableStateOf("") }
     var showColorPicker by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
+    LaunchedEffect(showError) {
+        if (showError) {
+            snackbarHostState.showSnackbar(errorMessage)
+            showError = false
+        }
+    }
     Column(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .padding(16.dp)
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollState)
-            .padding(16.dp),
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = Icons.Filled.AddToPhotos,
-            contentDescription = "Agregar Curso",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(64.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Text(
-            text = "Agregar Nuevo Curso",
+            text = "Agregar Curso",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(vertical = 16.dp),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         InputField(
             label = "Nombre del Curso",
@@ -68,7 +90,6 @@ fun AgregarCursosScreen(
             onValueChange = { nombreCurso = it }
         )
 
-        // Selector de color
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,10 +98,9 @@ fun AgregarCursosScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Seleccionar color del curso",
+                text = "Color del curso",
                 color = MaterialTheme.colorScheme.onBackground
             )
-
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -103,22 +123,88 @@ fun AgregarCursosScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
-        InputField(
-            label = "Aula",
-            value = aula,
-            onValueChange = { aula = it }
-        )
+        ExposedDropdownMenuBox(
+            expanded = expandedModalidad,
+            onExpandedChange = { expandedModalidad = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            OutlinedTextField(
+                value = aula,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedModalidad) },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                label = { Text("Modalidad") }
+            )
+            ExposedDropdownMenu(
+                expanded = expandedModalidad,
+                onDismissRequest = { expandedModalidad = false }
+            ) {
+                modalidades.forEach { modalidad ->
+                    DropdownMenuItem(
+                        text = { Text(modalidad) },
+                        onClick = {
+                            aula = modalidad
+                            expandedModalidad = false
+                        }
+                    )
+                }
+            }
+        }
+
         Button(
-            onClick = { onScreenSelected("lisCurso") },
+            onClick = {
+                if (nombreCurso.isBlank()) {
+                    errorMessage = "El nombre del curso es obligatorio"
+                    showError = true
+                    return@Button
+                }
+
+                val creditosInt = creditos.toIntOrNull()
+                if (creditosInt == null && creditos.isNotEmpty()) {
+                    errorMessage = "Los créditos deben ser un número válido"
+                    showError = true
+                    return@Button
+                }
+
+                isLoading = true
+                try {
+                    val curso = Curso(
+                        nombreCurso = nombreCurso.trim(), // Cambiar nombreCurso por nombre
+                        color = "#" + Integer.toHexString(selectedColor.toArgb())
+                            .uppercase().substring(2),
+                        profesor = profesor.trim(),
+                        creditos = creditosInt ?: 0,
+                        aula = aula.trim(),
+                        idUsuario = usuarioId
+                    )
+
+                    cursoViewModel.agregarCurso(curso)
+                    onScreenSelected("lisCurso")
+                } catch (e: Exception) {
+                    errorMessage = "Error al guardar el curso"
+                    showError = true
+                } finally {
+                    isLoading = false
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
+            enabled = !isLoading
         ) {
-            Text("Guardar Curso")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Guardar Curso")
+            }
         }
     }
 
@@ -126,13 +212,16 @@ fun AgregarCursosScreen(
         ColorPickerDialog(
             showDialog = true,
             initialColor = selectedColor,
-            onColorSelected = { color ->
-                selectedColor = color
+            onColorSelected = {
+                selectedColor = it
+                showColorPicker = false
             },
             onDismiss = { showColorPicker = false }
         )
     }
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,22 +232,15 @@ private fun InputField(
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    Column(
-        modifier = modifier.padding(vertical = 8.dp)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(bottom = 4.dp),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = keyboardOptions
-        )
-    }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        keyboardOptions = keyboardOptions
+    )
 }
 
 @Composable
@@ -204,7 +286,7 @@ private fun ColorPickerDialog(
                 }
             },
             confirmButton = {
-                Button(
+                TextButton(
                     onClick = {
                         onColorSelected(selectedColor)
                         onDismiss()
@@ -214,7 +296,7 @@ private fun ColorPickerDialog(
                 }
             },
             dismissButton = {
-                Button(onClick = onDismiss) {
+                TextButton(onClick = onDismiss) {
                     Text("Cancelar")
                 }
             }
@@ -229,25 +311,12 @@ private fun SimpleColorPicker(
     modifier: Modifier = Modifier
 ) {
     val colors = listOf(
-        Color.Red,
-        Color.Blue,
-        Color.Green,
-        Color.Yellow,
-        Color.Cyan,
-        Color.Magenta,
-        Color.Gray,
-        Color.DarkGray,
-        Color.LightGray,
-        Color.Black,
-        Color.White,
-        Color(0xFF6200EE),
-        Color(0xFF03DAC5),
-        Color(0xFFFFC107),
-        Color(0xFFFF5722),
-        Color(0xFF9C27B0),
-        Color(0xFF2196F3),
-        Color(0xFF4CAF50),
-        MaterialTheme.colorScheme.primary,
+        Color.Red, Color.Blue, Color.Green,
+        Color(0xFFf60a87), Color.Cyan, Color.Magenta,
+        Color.Gray, Color.DarkGray, Color.LightGray,
+        Color(0xFF6200EE), Color(0xFF03DAC5), Color(0xFFFFC107),
+        Color(0xFFFF5722), Color(0xFF9C27B0), Color(0xFF2196F3),
+        Color(0xFF4CAF50), MaterialTheme.colorScheme.primary,
         MaterialTheme.colorScheme.secondary
     )
 
