@@ -21,21 +21,22 @@ import androidx.navigation.NavController
 import com.menfroyt.studyoso.navigation.DrawerContent
 import kotlinx.coroutines.launch
 import com.menfroyt.studyoso.presentation.calificacion.AgregarCalificacionScreen
-import esan.mendoza.teststudyoso.presentation.curso.AgregarCursosScreen
-import esan.mendoza.teststudyoso.presentation.components.CalendarioScreen
+import com.menfroyt.studyoso.R
 import com.menfroyt.studyoso.presentation.calificacion.DetalleCalificacionesScreen
 import com.menfroyt.studyoso.presentation.calificacion.ListCalificacionScreen
 import com.menfroyt.studyoso.presentation.calificacion.SimuladorCalificacionesScreen
-import esan.mendoza.teststudyoso.presentation.config.ConfiguracionScreen
-import esan.mendoza.teststudyoso.presentation.components.DashboardScreen
-import esan.mendoza.teststudyoso.presentation.components.MatrizEisenhowerScreen
-import esan.mendoza.teststudyoso.presentation.usuario.PerfilScreen
-import esan.mendoza.teststudyoso.presentation.components.pomodoro.PomodoroScreen
-import esan.mendoza.teststudyoso.presentation.curso.DetalleCursoScreen
-import esan.mendoza.teststudyoso.presentation.curso.ListCursoScreen
-import esan.mendoza.teststudyoso.presentation.tarea.AddTaskScreen
-import esan.mendoza.teststudyoso.presentation.tarea.ListTaskScreen
-import com.menfroyt.studyoso.R
+import com.menfroyt.studyoso.presentation.components.DashboardScreen
+import com.menfroyt.studyoso.presentation.config.ConfiguracionScreen
+import com.menfroyt.studyoso.presentation.curso.AgregarCursosScreen
+import com.menfroyt.studyoso.presentation.curso.DetalleCursoScreen
+import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
+import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
+import com.menfroyt.studyoso.presentation.tarea.ListTaskScreen
+import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
+import com.menfroyt.studyoso.presentation.components.CalendarioScreen
+import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
+import com.menfroyt.studyoso.presentation.components.pomodoro.PomodoroScreen
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
