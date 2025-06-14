@@ -16,13 +16,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import esan.mendoza.teststudyoso.ViewModel.tarea.TareaViewModel
-import esan.mendoza.teststudyoso.ViewModel.tarea.TareaViewModelFactory
-import esan.mendoza.teststudyoso.data.db.AppDatabase
-import esan.mendoza.teststudyoso.data.entities.Tarea
-import esan.mendoza.teststudyoso.data.repositories.TareaRepository
-import java.time.format.DateTimeFormatter
-import java.time.LocalDate
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModel
+import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
+import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Tarea
+import com.menfroyt.studyoso.data.repositories.TareaRepository
+
 
 @Composable
 fun ListTaskScreen(
