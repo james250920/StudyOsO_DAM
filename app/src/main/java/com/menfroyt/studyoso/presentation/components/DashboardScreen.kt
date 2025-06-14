@@ -1,4 +1,6 @@
-package esan.mendoza.teststudyoso.presentation.components
+
+package com.menfroyt.studyoso.presentation.components
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
