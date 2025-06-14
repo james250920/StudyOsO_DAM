@@ -5,14 +5,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.menfroyt.studyoso.presentation.home.Home
-import com.menfroyt.studyoso.presentation.login.LoginScreen
-import com.menfroyt.studyoso.presentation.register.RegisterScreen
+import com.menfroyt.studyoso.presentation.auth.LoginScreen
+import com.menfroyt.studyoso.presentation.auth.RegisterScreen
+import com.menfroyt.studyoso.presentation.pages.StudyOsoLandingScreen
+
 
 
 @Composable
-fun NavegacionApp(
-    isDarkTheme: Boolean = false
-) {
+fun NavegacionApp() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "landing") {
         composable("landing") { StudyOsoLandingScreen(navController) }
