@@ -23,8 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.menfroyt.studyoso.R
-
+import esan.mendoza.teststudyoso.R
 @Composable
 fun StudyOsoLandingScreen(
     navController: NavController
@@ -56,7 +55,7 @@ fun StudyOsoLandingScreen(
             )
 
             Text(
-                text = "StudyOso aplicación que revolucionara tu organización " +
+                text = "StudyOso aplicación que revolucionará tu organización " +
                         "planificando las horas, asegurando que no te pierdas ninguna tarea " +
                         "y ayudando a gestionar tu vida académica " +
                         "de forma eficiente.",
