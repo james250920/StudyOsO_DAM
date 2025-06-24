@@ -11,8 +11,15 @@ import kotlinx.coroutines.launch
 
 class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() {
 
+    private val _usuarioAutenticado = MutableStateFlow<Usuario?>(null)
+    val usuarioAutenticado: StateFlow<Usuario?> = _usuarioAutenticado.asStateFlow()
+
     private val _usuarios = MutableStateFlow<List<Usuario>>(emptyList())
     val usuarios: StateFlow<List<Usuario>> = _usuarios.asStateFlow()
+
+    fun setUsuarioAutenticado(usuario: Usuario) {
+        _usuarioAutenticado.value = usuario
+    }
 
     fun loadUsuarios() {
         viewModelScope.launch {
