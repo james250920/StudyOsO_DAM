@@ -22,9 +22,10 @@ interface UsuarioDao {
     @Query("SELECT * FROM Usuarios")
     fun getAll(): Flow<List<Usuario>>
 
-    //login
-    @Query("SELECT * FROM usuarios WHERE correo = :correo AND contrasena = :contrasena LIMIT 1")
-    suspend fun login(correo: String, contrasena: String): Usuario?
+    @Query("SELECT * FROM usuarios WHERE correo = :correo LIMIT 1")
+    suspend fun getUsuarioByEmail(correo: String): Usuario?
+
+
     //usuario autenticado actualmente
     @Query("SELECT * FROM Usuarios WHERE id_usuario = :id")
     suspend fun getUsuarioAutenticado(id: Int): Usuario?

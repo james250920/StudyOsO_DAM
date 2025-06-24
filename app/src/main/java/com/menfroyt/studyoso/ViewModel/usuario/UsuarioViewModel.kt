@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.menfroyt.studyoso.data.entities.Usuario
 import com.menfroyt.studyoso.data.repositories.UsuarioRepository
+import com.menfroyt.studyoso.utils.checkPassword
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,21 +47,32 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
             repository.delete(usuario)
         }
     }
-    fun login(
-        correo: String,
-        contrasena: String,
-        onSuccess: (Usuario) -> Unit,
-        onError: (String) -> Unit
-    ) {
+    fun login(correo: String, contrasena: String, onSuccess: (Usuario) -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val usuario = repository.login(correo, contrasena)
+                val usuario = repository.getUsuarioByEmail(correo)
+                println("Usuario encontrado: ${usuario != null}")
                 if (usuario != null) {
-                    onSuccess(usuario)
+                    println("Hash almacenado: ${usuario.contrasena}")
+                    println("Contraseña ingresada (sin hash): $contrasena")
+                    val isValidPassword = checkPassword(contrasena, usuario.contrasena)
+                    println("Resultado de verificación: $isValidPassword")
+
+                    if (isValidPassword) {
+                        println("Login exitoso")
+                        _usuarioAutenticado.value = usuario
+                        onSuccess(usuario)
+                    } else {
+                        println("Contraseña incorrecta")
+                        onError("Credenciales incorrectas")
+                    }
                 } else {
-                    onError("Credenciales incorrectas")
+                    println("Usuario no encontrado")
+                    onError("Usuario no encontrado")
                 }
             } catch (e: Exception) {
+                println("Error en login: ${e.message}")
+                e.printStackTrace()
                 onError("Error al iniciar sesión: ${e.message}")
             }
         }
