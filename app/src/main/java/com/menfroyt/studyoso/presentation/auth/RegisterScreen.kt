@@ -27,7 +27,10 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import com.menfroyt.studyoso.utils.hashPassword
-
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +44,7 @@ fun RegisterScreen(
     val usuarioViewModel: UsuarioViewModel = viewModel(
         factory = UsuarioViewModelFactory(usuarioRepository)
     )
+    val sessionManager = remember { SessionManager(context) }
 
     var nombre by remember { mutableStateOf(TextFieldValue("")) }
     var apellido by remember { mutableStateOf(TextFieldValue("")) }
@@ -87,29 +91,68 @@ fun RegisterScreen(
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { },
-            title = { Text("¡Éxito!") },
-            text = { Text("Registro completado correctamente") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showSuccessDialog = false
-                    // Iniciar el proceso de login
-                    usuarioViewModel.login(
-                        correo.text.trim(),
-                        contrasena.text.trim(),
-                        onSuccess = { usuarioAutenticado ->
-                            navController.navigate("home/${usuarioAutenticado.idUsuario}") {
-                                popUpTo("register") { inclusive = true }
-                            }
-                        },
-                        onError = { error ->
-                            showError = true
-                            errorMessage = error
-                        }
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "Éxito",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "¡Registro Exitoso!",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Tu cuenta ha sido creada correctamente",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
                     )
-                }) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showSuccessDialog = false
+                        usuarioViewModel.login(
+                            correo.text.trim(),
+                            contrasena.text.trim(),
+                            onSuccess = { usuarioAutenticado ->
+                                sessionManager.saveSession(usuarioAutenticado.idUsuario, correo.text.trim())
+                                navController.navigate("home/${usuarioAutenticado.idUsuario}") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                            },
+                            onError = { error ->
+                                showError = true
+                                errorMessage = error
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Continuar")
                 }
-            }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.padding(16.dp)
         )
     }
 
