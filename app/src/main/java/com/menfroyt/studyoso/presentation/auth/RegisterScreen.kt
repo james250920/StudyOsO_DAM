@@ -25,7 +25,9 @@ import java.sql.Date
 import java.util.*
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
 import com.menfroyt.studyoso.utils.hashPassword
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +57,9 @@ fun RegisterScreen(
     var errorMessage by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    var isLoading by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
         selectableDates = object : SelectableDates {
@@ -69,6 +74,43 @@ fun RegisterScreen(
             snackbarHostState.showSnackbar(errorMessage)
             showError = false
         }
+    }
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("¡Éxito!") },
+            text = { Text("Registro completado correctamente") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSuccessDialog = false
+                    // Iniciar el proceso de login
+                    usuarioViewModel.login(
+                        correo.text.trim(),
+                        contrasena.text.trim(),
+                        onSuccess = { usuarioAutenticado ->
+                            navController.navigate("home/${usuarioAutenticado.idUsuario}") {
+                                popUpTo("register") { inclusive = true }
+                            }
+                        },
+                        onError = { error ->
+                            showError = true
+                            errorMessage = error
+                        }
+                    )
+                }) {
+                    Text("Continuar")
+                }
+            }
+        )
     }
 
     if (showDatePicker) {
@@ -210,6 +252,8 @@ fun RegisterScreen(
                         showError = true
                         return@Button
                     }
+
+                    isLoading = true
                     val hashedPassword = hashPassword(contrasena.text.trim())
                     val usuario = Usuario(
                         nombre = nombre.text.trim(),
@@ -219,31 +263,19 @@ fun RegisterScreen(
                         fechaNacimiento = fechaNacimiento.text.trim()
                     )
 
-                    usuarioViewModel.agregarUsuario(usuario)
                     scope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = "Registro exitoso",
-                            duration = SnackbarDuration.Short
-                        )
-                        delay(1000)
-
-                        usuarioViewModel.login(
-                            correo.text.trim(),
-                            contrasena.text.trim(),
-                            onSuccess = { usuarioAutenticado ->
-                                // Navegamos con el ID del usuario
-                                navController.navigate("home/${usuarioAutenticado.idUsuario}") {
-                                    popUpTo("register") { inclusive = true }
-                                }
-                            },
-                            onError = { error ->
-                                showError = true
-                                errorMessage = error
-                            }
-                        )
+                        try {
+                            usuarioViewModel.agregarUsuario(usuario)
+                            delay(1500) // Simular carga
+                            isLoading = false
+                            showSuccessDialog = true
+                        } catch (e: Exception) {
+                            isLoading = false
+                            showError = true
+                            errorMessage = "Error al registrar: ${e.message}"
+                        }
                     }
                 },
-
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Registrarse")
