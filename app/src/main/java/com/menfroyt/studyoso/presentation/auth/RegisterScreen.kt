@@ -25,6 +25,7 @@ import java.sql.Date
 import java.util.*
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.MaterialTheme
+import com.menfroyt.studyoso.utils.hashPassword
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -209,12 +210,12 @@ fun RegisterScreen(
                         showError = true
                         return@Button
                     }
-
+                    val hashedPassword = hashPassword(contrasena.text.trim())
                     val usuario = Usuario(
                         nombre = nombre.text.trim(),
                         apellido = apellido.text.trim(),
                         correo = correo.text.trim(),
-                        contrasena = contrasena.text.trim(),
+                        contrasena = hashedPassword,
                         fechaNacimiento = fechaNacimiento.text.trim()
                     )
 

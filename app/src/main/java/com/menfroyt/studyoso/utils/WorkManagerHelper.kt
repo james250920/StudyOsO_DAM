@@ -1,4 +1,4 @@
-package com.menfroyt.studyoso.di
+package com.menfroyt.studyoso.utils
 
 import android.content.Context
 import androidx.work.Constraints

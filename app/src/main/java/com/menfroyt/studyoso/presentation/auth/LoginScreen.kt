@@ -112,7 +112,6 @@ fun LoginScreen(
                         showError = true
                         return@Button
                     }
-
                     usuarioViewModel.login(
                         correo.text.trim(),
                         contrasena.text.trim(),
