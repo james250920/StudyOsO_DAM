@@ -25,7 +25,12 @@ import java.sql.Date
 import java.util.*
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
 import com.menfroyt.studyoso.utils.hashPassword
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +44,7 @@ fun RegisterScreen(
     val usuarioViewModel: UsuarioViewModel = viewModel(
         factory = UsuarioViewModelFactory(usuarioRepository)
     )
+    val sessionManager = remember { SessionManager(context) }
 
     var nombre by remember { mutableStateOf(TextFieldValue("")) }
     var apellido by remember { mutableStateOf(TextFieldValue("")) }
@@ -55,6 +61,9 @@ fun RegisterScreen(
     var errorMessage by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    var isLoading by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
         selectableDates = object : SelectableDates {
@@ -69,6 +78,82 @@ fun RegisterScreen(
             snackbarHostState.showSnackbar(errorMessage)
             showError = false
         }
+    }
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "Éxito",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "¡Registro Exitoso!",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Tu cuenta ha sido creada correctamente",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showSuccessDialog = false
+                        usuarioViewModel.login(
+                            correo.text.trim(),
+                            contrasena.text.trim(),
+                            onSuccess = { usuarioAutenticado ->
+                                sessionManager.saveSession(usuarioAutenticado.idUsuario, correo.text.trim())
+                                navController.navigate("home/${usuarioAutenticado.idUsuario}") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                            },
+                            onError = { error ->
+                                showError = true
+                                errorMessage = error
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Continuar")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 
     if (showDatePicker) {
@@ -210,6 +295,8 @@ fun RegisterScreen(
                         showError = true
                         return@Button
                     }
+
+                    isLoading = true
                     val hashedPassword = hashPassword(contrasena.text.trim())
                     val usuario = Usuario(
                         nombre = nombre.text.trim(),
@@ -219,31 +306,19 @@ fun RegisterScreen(
                         fechaNacimiento = fechaNacimiento.text.trim()
                     )
 
-                    usuarioViewModel.agregarUsuario(usuario)
                     scope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = "Registro exitoso",
-                            duration = SnackbarDuration.Short
-                        )
-                        delay(1000)
-
-                        usuarioViewModel.login(
-                            correo.text.trim(),
-                            contrasena.text.trim(),
-                            onSuccess = { usuarioAutenticado ->
-                                // Navegamos con el ID del usuario
-                                navController.navigate("home/${usuarioAutenticado.idUsuario}") {
-                                    popUpTo("register") { inclusive = true }
-                                }
-                            },
-                            onError = { error ->
-                                showError = true
-                                errorMessage = error
-                            }
-                        )
+                        try {
+                            usuarioViewModel.agregarUsuario(usuario)
+                            delay(1500) // Simular carga
+                            isLoading = false
+                            showSuccessDialog = true
+                        } catch (e: Exception) {
+                            isLoading = false
+                            showError = true
+                            errorMessage = "Error al registrar: ${e.message}"
+                        }
                     }
                 },
-
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Registrarse")
