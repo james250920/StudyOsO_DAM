@@ -19,14 +19,19 @@ import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModelFactory
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.entities.Usuario
 import com.menfroyt.studyoso.data.repositories.UsuarioRepository
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.sql.Date
 import java.util.*
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.MaterialTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navController: NavController
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) }
     val usuarioRepository = remember { UsuarioRepository(db.UsuarioDao()) }
@@ -37,7 +42,12 @@ fun RegisterScreen(
     var nombre by remember { mutableStateOf(TextFieldValue("")) }
     var apellido by remember { mutableStateOf(TextFieldValue("")) }
     var correo by remember { mutableStateOf(TextFieldValue("")) }
+
     var contrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var confirmarContrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var passwordsMatch by remember { mutableStateOf(true) }
+    var confirmarContrasenaError by remember { mutableStateOf(false) }
+
     var fechaNacimiento by remember { mutableStateOf(TextFieldValue("")) }
     val snackbarHostState = remember { SnackbarHostState() }
     var showError by remember { mutableStateOf(false) }
@@ -131,6 +141,43 @@ fun RegisterScreen(
             )
 
             OutlinedTextField(
+                value = confirmarContrasena,
+                onValueChange = {
+                    confirmarContrasena = it
+                    passwordsMatch = contrasena.text == it.text
+                    confirmarContrasenaError = it.text.isNotEmpty() && !passwordsMatch
+                },
+                label = { Text("Confirmar Contraseña") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth(),
+                isError = confirmarContrasenaError,
+                supportingText = {
+                    if (confirmarContrasenaError) {
+                        Text(
+                            text = "Las contraseñas no coinciden",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else if (confirmarContrasena.text.isNotEmpty() && passwordsMatch) {
+                        Text(
+                            text = "Las contraseñas coinciden",
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
+                        if (passwordsMatch) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.outline,
+                    unfocusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
+                        if (passwordsMatch) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.outline
+                )
+            )
+
+            OutlinedTextField(
                 value = fechaNacimiento,
                 onValueChange = { fechaNacimiento = it },
                 label = { Text("Fecha de Nacimiento") },
@@ -148,12 +195,17 @@ fun RegisterScreen(
 
             Button(
                 onClick = {
-                    navController.navigate("login")
                     if (nombre.text.isBlank() || apellido.text.isBlank() ||
                         correo.text.isBlank() || contrasena.text.isBlank() ||
-                        fechaNacimiento.text.isBlank()
+                        fechaNacimiento.text.isBlank() || confirmarContrasena.text.isBlank()
                     ) {
                         errorMessage = "Complete todos los campos"
+                        showError = true
+                        return@Button
+                    }
+
+                    if (contrasena.text != confirmarContrasena.text) {
+                        errorMessage = "Las contraseñas no coinciden"
                         showError = true
                         return@Button
                     }
@@ -165,16 +217,36 @@ fun RegisterScreen(
                         contrasena = contrasena.text.trim(),
                         fechaNacimiento = fechaNacimiento.text.trim()
                     )
+
                     usuarioViewModel.agregarUsuario(usuario)
-                    navController.navigate("login") {
-                        popUpTo("register") { inclusive = true }
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "Registro exitoso",
+                            duration = SnackbarDuration.Short
+                        )
+                        delay(1000)
+
+                        usuarioViewModel.login(
+                            correo.text.trim(),
+                            contrasena.text.trim(),
+                            onSuccess = { usuarioAutenticado ->
+                                // Navegamos con el ID del usuario
+                                navController.navigate("home/${usuarioAutenticado.idUsuario}") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                            },
+                            onError = { error ->
+                                showError = true
+                                errorMessage = error
+                            }
+                        )
                     }
                 },
+
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Registrarse")
             }
-
             TextButton(
                 onClick = { navController.navigate("login") }
             ) {
@@ -183,3 +255,6 @@ fun RegisterScreen(
         }
     }
 }
+
+
+
