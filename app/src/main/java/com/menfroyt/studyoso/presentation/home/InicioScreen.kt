@@ -186,7 +186,7 @@ private fun EventosDelDiaCard(
                 Icon(
                     imageVector = Icons.Filled.CalendarMonth,
                     contentDescription = "Eventos del día",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color(0xFF3355ff),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
@@ -205,12 +205,13 @@ private fun EventosDelDiaCard(
                 ) {
                     Text(
                         text = "ver todos",
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color(0xFF3355ff),
                     )
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = "Ver todos los eventos",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color(0xFF3355ff)
                     )
                 }
             }

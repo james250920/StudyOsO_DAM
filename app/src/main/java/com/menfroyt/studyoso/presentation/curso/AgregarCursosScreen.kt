@@ -194,8 +194,13 @@ fun AgregarCursosScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            enabled = !isLoading
+                .padding(vertical = 16.dp)
+                ,
+            enabled = !isLoading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff),
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
