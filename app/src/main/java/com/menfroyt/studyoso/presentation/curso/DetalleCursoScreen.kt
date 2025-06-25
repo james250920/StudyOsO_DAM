@@ -278,14 +278,7 @@ internal fun PruebasSection(
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Button(
-                onClick = { showDialog = true },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text("Agregar Prueba")
-            }
+
         }
 
         if (tiposPrueba.isEmpty()) {
@@ -326,12 +319,21 @@ internal fun PruebasSection(
                 }
             }
         }
+        Button(
+            onClick = { showDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff)
+            )
+        ) {
+            Text("Agregar Prueba")
+        }
 
         Button(
             onClick = { onScreenSelected("AgregarCalificacion") },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = Color(0xFF3355ff)
             )
         ) {
             Text("Agregar calificación")
@@ -590,12 +592,23 @@ private fun DialogoAgregarPrueba(
                 }
             },
             confirmButton = {
-                Button(onClick = { onConfirm(state) }) {
+                Button(onClick = { onConfirm(state) },
+                    enabled = state.isValid(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3355ff),
+                        contentColor = Color.White
+                    )
+                ) {
                     Text("Guardar")
                 }
             },
             dismissButton = {
-                Button(onClick = onDismiss) {
+                Button(onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = Color.White
+                    )
+                    ) {
                     Text("Cancelar")
                 }
             }
@@ -673,7 +686,7 @@ internal fun HorarioSection(
             onClick = { showDialog = true },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = Color(0xFF3355ff)
             )
         ) {
             Text("Agregar horario")
@@ -987,13 +1000,22 @@ private fun DialogoAgregarHorario(
             confirmButton = {
                 Button(
                     onClick = { onConfirm(state) },
-                    enabled = state.isValid()
+                    enabled = state.isValid(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3355ff),
+                        contentColor = Color.White
+                    )
                 ) {
                     Text("Guardar")
                 }
             },
             dismissButton = {
-                Button(onClick = onDismiss) {
+                Button(onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFf60a0a),
+                        contentColor = Color.White
+                    )
+                    ) {
                     Text("Cancelar")
                 }
             }

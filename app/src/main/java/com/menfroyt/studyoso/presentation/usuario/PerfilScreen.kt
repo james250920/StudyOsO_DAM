@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,7 +74,6 @@ fun PerfilScreen(
         }
     }
 }
-
 @Composable
 private fun PerfilContent(
     usuario: Usuario,
@@ -85,72 +85,78 @@ private fun PerfilContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Foto de perfil
+        // Foto de perfil con colores actualizados
         Box(
             modifier = Modifier
-                .size(120.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                .size(140.dp)
+                .background(Color(0xFFE3F2FD), CircleShape)  // Azul muy claro
+                .border(3.dp, Color(0xFF1976D2), CircleShape)  // Azul principal
+                .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.AccountCircle,
                 contentDescription = "Foto de perfil",
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
+                modifier = Modifier.size(100.dp),
+                tint = Color(0xFF1976D2)  // Azul principal
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // Nombre completo
         Text(
             text = "${usuario.nombre} ${usuario.apellido}",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,  // Casi negro para mejor legibilidad
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(36.dp))
 
-        // Información personal
+        // Secciones con nuevos colores
         InfoSection(
             title = "Información Personal",
             items = listOf(
                 InfoItem("Email", usuario.correo),
                 InfoItem("Fecha de Nacimiento", usuario.fechaNacimiento.toString())
-            )
+            ),
+            iconTint = Color(0xFF1976D2)  // Azul principal
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // Estadísticas académicas - puedes mejorar aquí para obtener datos reales
         InfoSection(
             title = "Estadísticas",
             items = listOf(
-                InfoItem("Cursos Activos", "7"), // Ejemplo, reemplazar si tienes datos reales
-                InfoItem("Número de Créditos", "24"), // Ejemplo, reemplazar si tienes datos reales
-                InfoItem("Promedio General", "18.5") // Ejemplo, reemplazar si tienes datos reales
-            )
+                InfoItem("Cursos Activos", "7"),
+                InfoItem("Número de Créditos", "24"),
+                InfoItem("Promedio General", "18.5")
+            ),
+            iconTint = Color(0xFF00897B)  // Verde azulado
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // Botón de editar perfil
         Button(
             onClick = { onScreenSelected("EditarPerfil") },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
+                .fillMaxWidth(0.8f)
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff),  // Azul principal
+                contentColor = Color.White
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Edit,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text("Editar Perfil")
         }
     }
@@ -159,7 +165,8 @@ private fun PerfilContent(
 @Composable
 private fun InfoSection(
     title: String,
-    items: List<InfoItem>
+    items: List<InfoItem>,
+    iconTint: Color
 ) {
     Column(
         modifier = Modifier
@@ -168,26 +175,28 @@ private fun InfoSection(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleLarge,
+            color = iconTint,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+                containerColor = Color.White  // Fondo blanco para las tarjetas
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 items.forEachIndexed { index, item ->
                     InfoRow(item)
                     if (index < items.size - 1) {
                         Divider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = Color(0xFFE0E0E0),  // Gris claro para divisores
+                            thickness = 1.dp
                         )
                     }
                 }
@@ -202,12 +211,12 @@ private fun InfoRow(item: InfoItem) {
         Text(
             text = item.label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color(0xFF757575)  // Gris medio para etiquetas
         )
         Text(
             text = item.value,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color(0xFF212121)  // Casi negro para valores
         )
     }
 }
