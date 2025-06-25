@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -113,12 +114,36 @@ fun AddTaskScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ){
+            IconButton(
+                onClick = { onScreenSelected("ListTaskScreen") },
+                modifier = Modifier
+                    .padding(start = 0.dp, end = 8.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color(0xFF3355ff),
+
+                    )
+
+
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Regresar",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = "Agregar Tarea",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(vertical = 16.dp),
             textAlign = TextAlign.Center
         )
+        }
         // Dropdown Cursos
         ExposedDropdownMenuBox(
             expanded = expandidoCurso,
