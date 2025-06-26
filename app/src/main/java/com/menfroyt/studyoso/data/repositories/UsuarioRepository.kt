@@ -15,9 +15,10 @@ class UsuarioRepository(private val dao: UsuarioDao) {
 
     suspend fun delete(usuario: Usuario) = dao.delete(usuario)
 
-    suspend fun login(correo: String, contrasena: String): Usuario? {
-        return dao.login(correo, contrasena)
+    suspend fun getUsuarioByEmail(correo: String): Usuario? {
+        return dao.getUsuarioByEmail(correo)
     }
+
     suspend fun getUsuarioAutenticado(id: Int): Usuario? {
         return dao.getUsuarioAutenticado(id)
     }

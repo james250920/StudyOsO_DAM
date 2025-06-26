@@ -6,8 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.menfroyt.studyoso.di.PermissionHelper
-import com.menfroyt.studyoso.di.WorkManagerHelper
+import com.menfroyt.studyoso.utils.PermissionHelper
+import com.menfroyt.studyoso.utils.WorkManagerHelper
 import com.menfroyt.studyoso.ui.theme.StudyOsoTheme
 import com.menfroyt.studyoso.navigation.NavegacionApp
 

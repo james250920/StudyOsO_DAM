@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,8 +54,12 @@ fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (Str
                 )
             },
             modifier = Modifier
-                .fillMaxWidth() // Para que el botón ocupe todo el ancho
-                .padding(vertical = 8.dp) // Añadir un poco de espacio vertical
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff), // Color de fondo del botón
+                contentColor = MaterialTheme.colorScheme.onPrimary  // Color del texto/contenido
+            )
         ) {
             Text("Agregar tarea")
         }

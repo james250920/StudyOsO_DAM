@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -156,13 +157,26 @@ private fun CalendarHeader(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Button(onClick = { onModeChanged(CalendarMode.MONTH) }) {
+        Button(onClick = { onModeChanged(CalendarMode.MONTH)
+        },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff),
+                contentColor = Color.White
+            )
+            ) {
             Text("Mes")
         }
-        Button(onClick = { onModeChanged(CalendarMode.WEEK) }) {
+        Button(onClick = { onModeChanged(CalendarMode.WEEK) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff),
+                contentColor = Color.White
+            )) {
             Text("Semana")
         }
-        Button(onClick = { onModeChanged(CalendarMode.DAY) }) {
+        Button(onClick = { onModeChanged(CalendarMode.DAY) },colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF3355ff),
+            contentColor = Color.White
+        )) {
             Text("Día")
         }
     }
@@ -323,12 +337,23 @@ private fun DayCell(
             .padding(2.dp)
             .background(
                 when {
-                    isSelected -> MaterialTheme.colorScheme.primary
-                    isToday -> MaterialTheme.colorScheme.secondary
+                    isSelected -> Color(0xFF2196F3)  // Azul más suave cuando está seleccionado
+                    isToday -> Color(0xFFBBDEFB)     // Azul claro para el día actual
                     else -> Color.Transparent
-                }
+                },
+                shape = CircleShape
             )
-            .clickable { onDateSelected(date) },
+            .clickable { onDateSelected(date) }
+            .border(
+                width = if (isSelected || isToday) 2.dp else 1.dp,
+                color = when {
+                    isSelected -> Color(0xFF1976D2)  // Borde más oscuro para el día seleccionado
+                    isToday -> Color(0xFF2196F3)     // Borde azul para el día actual
+                    else -> Color(0xFFE0E0E0)        // Gris claro para días normales
+                },
+                shape = CircleShape
+            )
+        ,
         contentAlignment = Alignment.Center
     ) {
         Text(

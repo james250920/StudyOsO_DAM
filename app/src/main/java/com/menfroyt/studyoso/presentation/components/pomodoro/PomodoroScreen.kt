@@ -114,7 +114,7 @@ fun PomodoroScreen(
                             Icon(
                                 imageVector = if (isRunning) Icons.Filled.Stop else Icons.Filled.PlayCircleFilled,
                                 contentDescription = if (isRunning) "Stop" else "Play",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = Color(0xFF3355ff),
                                 modifier = Modifier.size(100.dp)
                             )
                         }
@@ -145,7 +145,7 @@ fun PomodoroScreen(
                             Icon(
                                 imageVector = Icons.Filled.Stop,
                                 contentDescription = "Stop",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = Color(0xFF3355ff)
                             )
                         }
 
@@ -166,7 +166,7 @@ fun PomodoroScreen(
                             Icon(
                                 imageVector = Icons.Filled.RestartAlt,
                                 contentDescription = "Reset",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = Color(0xFF3355ff)
                             )
                         }
                     }
@@ -189,7 +189,7 @@ fun PomodoroScreen(
                 Icon(
                     imageVector = Icons.Default.LibraryMusic,
                     contentDescription = "Music",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color(0xFF3355ff)
                 )
             }
 
@@ -208,7 +208,7 @@ fun PomodoroScreen(
                 Icon(
                     imageVector = Icons.Filled.ViewModule,
                     contentDescription = "Pomodoro Settings",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color(0xFF3355ff)
                 )
             }
             var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }

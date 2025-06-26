@@ -37,7 +37,7 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
         Text(
             text = "Menú",
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
+            color = Color(0xFF3355ff),
             modifier = Modifier.padding(bottom = 16.dp)
         )
         DrawerOption(

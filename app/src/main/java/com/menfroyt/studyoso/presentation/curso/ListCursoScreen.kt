@@ -92,7 +92,7 @@ fun ListCursoScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = Color(0xFF3355ff),
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(
@@ -149,7 +149,7 @@ private fun EmptyState() {
             imageVector = Icons.Filled.AddToPhotos,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
+            tint = Color(0xFF3355ff)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(

@@ -1,5 +1,6 @@
 package com.menfroyt.studyoso.presentation.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -133,9 +134,10 @@ fun Home(
 
                     NavigationBar(
                         containerColor = Color(0xFF3355ff),
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+
                     ) {
                         NavigationBarItem(
+                            modifier = Modifier.background(color = Color(0xFF3355ff)),
                             selected = selectedScreen == "Dashboard",
                             onClick = { selectedScreen = "Dashboard" },
                             icon = {
@@ -147,10 +149,10 @@ fun Home(
                             },
                             label = { Text("Dashboard") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFF3355ff),
+                                selectedIconColor = Color(0xFF354FFC),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
-                                unselectedTextColor = Color.White
+                                unselectedTextColor = Color.White,
                             )
                         )
 
@@ -166,7 +168,7 @@ fun Home(
                             },
                             label = { Text("Pomodoro") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFF3355ff),
+                                selectedIconColor = Color(0xFF354FFC),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -185,7 +187,7 @@ fun Home(
                             },
                             label = { Text("Inicio") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFF3355ff),
+                                selectedIconColor = Color(0xFF354FFC),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -204,7 +206,7 @@ fun Home(
                             },
                             label = { Text("Notas") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFF3355ff),
+                                selectedIconColor = Color(0xFF354FFC),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White
@@ -223,7 +225,7 @@ fun Home(
                             },
                             label = { Text("Tareas") },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color(0xFF3355ff),
+                                selectedIconColor = Color(0xFF354FFC),
                                 unselectedIconColor = Color.White,
                                 selectedTextColor = Color.White,
                                 unselectedTextColor = Color.White

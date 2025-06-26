@@ -93,7 +93,7 @@ fun ListCalificacionScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = Color(0xFF3355ff),
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(

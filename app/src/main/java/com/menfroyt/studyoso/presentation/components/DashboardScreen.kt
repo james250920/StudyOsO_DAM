@@ -92,7 +92,7 @@ fun DashboardScreen(
                     title = "Tareas Pendientes",
                     value = tareas.size.toString(),
                     icon = Icons.Filled.Assignment,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color(0xFF3355ff),
                     onClick = { onScreenSelected("ListTaskScreen") }
                 )
             }
@@ -105,7 +105,7 @@ fun DashboardScreen(
                         String.format("%.2f", promedioGeneral)
                     } else "0.0",
                     icon = Icons.Filled.Grade,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = Color(0xFFFF5722),
                     onClick = { onScreenSelected("ListCalificaciones") }
                 )
             }
@@ -115,20 +115,12 @@ fun DashboardScreen(
                     title = "Cursos Activos",
                     value = cursos.size.toString(),
                     icon = Icons.Filled.School,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = Color(0xFF9C27B0),
                     onClick = { onScreenSelected("lisCurso") }
                 )
             }
+            //poner un elemento mas para el dashboard
 
-            item {
-                DashboardCard(
-                    title = "Pomodoros Completados",
-                    value = "0", // Aquí puedes agregar lógica para contar pomodoros si tienes datos
-                    icon = Icons.Filled.Timer,
-                    color = MaterialTheme.colorScheme.error,
-                    onClick = { onScreenSelected("Pomodoro") }
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -207,7 +199,15 @@ private fun ProximasTareasCard(
                     text = "Próximas Tareas",
                     style = MaterialTheme.typography.titleMedium
                 )
-                TextButton(onClick = onVerMasClick) {
+                Button(onClick = onVerMasClick,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color(0xFF3355ff),
+
+                    )
+                ) {
+
+
+
                     Text("Ver más")
                 }
             }

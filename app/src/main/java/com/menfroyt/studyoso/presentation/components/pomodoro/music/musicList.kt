@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 
@@ -132,7 +133,7 @@ fun MusicListDialog(
                                 Text(
                                     text = fileName,
                                     color = if (selectedFile == fileName)
-                                        MaterialTheme.colorScheme.primary
+                                        Color(0xFF3355ff)
                                     else
                                         MaterialTheme.colorScheme.onSurface
                                 )
@@ -162,8 +163,14 @@ fun MusicListDialog(
                 }
             },
             confirmButton = {
-                Button(onClick = onConfirm) {
+                Button(onClick = onConfirm,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3355ff),
+                        contentColor = Color.White
+                    )
+                ) {
                     Text("Aceptar")
+
                 }
             },
             dismissButton = {
@@ -174,7 +181,12 @@ fun MusicListDialog(
                     }
                     onMediaPlayerChange(null)
                     onDismiss()
-                }) {
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3355ff),
+                        contentColor = Color.White
+                    )
+                ) {
                     Text("Cancelar")
                 }
             }

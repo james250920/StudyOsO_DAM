@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
@@ -55,7 +57,11 @@ if(show) {
                     value = focus,
                     onValueChange = { focus = it },
                     valueRange = 15f..60f,
-                    steps = 45
+                    steps = 45,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF3355ff),
+                        activeTrackColor = Color(0xFF3355ff)
+                    )
                 )
 
                 Text("Descanso: ${short.toInt()} min", style = MaterialTheme.typography.bodyLarge)
@@ -63,7 +69,11 @@ if(show) {
                     value = short,
                     onValueChange = { short = it },
                     valueRange = 5f..30f,
-                    steps = 25
+                    steps = 25,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF3355ff),
+                        activeTrackColor = Color(0xFF3355ff)
+                    )
                 )
 
                 Text(
@@ -74,7 +84,11 @@ if(show) {
                     value = long,
                     onValueChange = { long = it },
                     valueRange = 5f..60f,
-                    steps = 55
+                    steps = 55,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF3355ff),
+                        activeTrackColor = Color(0xFF3355ff)
+                    )
                 )
 
                 Text(
@@ -85,7 +99,11 @@ if(show) {
                     value = interval,
                     onValueChange = { interval = it },
                     valueRange = 1f..10f,
-                    steps = 9
+                    steps = 9,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF3355ff),
+                        activeTrackColor = Color(0xFF3355ff)
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -94,13 +112,18 @@ if(show) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                    TextButton(onClick = onDismiss,) {
+                        Text(
+                            "Cancel",
+                            color = Color(0xFF3355ff)
+                        )
+
                     }
                     TextButton(onClick = {
                         onConfirm(focus.toInt(), short.toInt(), long.toInt(), interval.toInt())
                     }) {
-                        Text("OK")
+                        Text("OK",
+                            color = Color(0xFF3355ff))
                     }
                 }
             }

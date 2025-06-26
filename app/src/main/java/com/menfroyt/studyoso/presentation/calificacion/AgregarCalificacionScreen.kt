@@ -3,9 +3,13 @@ package com.menfroyt.studyoso.presentation.calificacion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -87,12 +91,37 @@ fun AgregarCalificacionScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text(
-            text = "Agregar Calificación",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            IconButton(
+                onClick = { onScreenSelected("ListCalificaciones") },
+                modifier = Modifier
+                    .padding(start = 0.dp, end = 8.dp),
+
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color(0xFF3355ff),
+
+                    )
+
+
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Regresar",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Agregar Calificación",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
         // Dropdown Cursos
         ExposedDropdownMenuBox(
@@ -242,6 +271,10 @@ fun AgregarCalificacionScreen(
                     tipoPruebaSeleccionada != null &&
                     numeroPruebaSeleccionado != null &&
                     calificacionTexto.isNotBlank(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff),
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
         ) {
             Text("Guardar Calificación")
         }

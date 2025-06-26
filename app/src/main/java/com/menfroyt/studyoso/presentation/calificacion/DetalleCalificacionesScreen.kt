@@ -179,7 +179,7 @@ fun DetalleCalificacionesScreen(
                             .padding(top = 16.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
+                            containerColor = Color(0xFF3355ff),
                             contentColor = Color.White
                         ),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)

@@ -5,11 +5,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -112,12 +114,36 @@ fun AddTaskScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ){
+            IconButton(
+                onClick = { onScreenSelected("ListTaskScreen") },
+                modifier = Modifier
+                    .padding(start = 0.dp, end = 8.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color(0xFF3355ff),
+
+                    )
+
+
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Regresar",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = "Agregar Tarea",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(vertical = 16.dp),
             textAlign = TextAlign.Center
         )
+        }
         // Dropdown Cursos
         ExposedDropdownMenuBox(
             expanded = expandidoCurso,
@@ -179,7 +205,12 @@ fun AddTaskScreen(
                 ) {
                     RadioButton(
                         selected = esImportante == valor,
-                        onClick = { esImportante = valor })
+                        onClick = { esImportante = valor },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFF3355ff),
+                            unselectedColor = Color(0xFF3355ff).copy(alpha = 0.6f)
+                        )
+                        )
                     Text(text = texto)
                 }
             }
@@ -201,7 +232,14 @@ fun AddTaskScreen(
                         .padding(end = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RadioButton(selected = esUrgente == valor, onClick = { esUrgente = valor })
+                    RadioButton(
+                        selected = esUrgente == valor,
+                        onClick = { esUrgente = valor },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFF3355ff),
+                            unselectedColor = Color(0xFF3355ff).copy(alpha = 0.6f)
+                        )
+                    )
                     Text(text = texto)
                 }
             }
@@ -219,7 +257,8 @@ fun AddTaskScreen(
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
-                        contentDescription = "Seleccionar fecha"
+                        contentDescription = "Seleccionar fecha",
+                        tint = Color(0xFF3355ff)
                     )
                 }
             }
@@ -273,7 +312,11 @@ fun AddTaskScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3355ff),
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
         ) {
             Text(text = "Guardar")
         }
