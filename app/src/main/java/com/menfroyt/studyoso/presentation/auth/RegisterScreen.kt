@@ -1,5 +1,6 @@
 package com.menfroyt.studyoso.presentation.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -7,13 +8,16 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.navigation.NavController
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.menfroyt.studyoso.R
 import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModel
 import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModelFactory
 import com.menfroyt.studyoso.data.db.AppDatabase
@@ -31,6 +35,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.text.style.TextAlign
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,8 +167,9 @@ fun RegisterScreen(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
+                    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val date = Date(millis)
+                        val date = Date(millis + 86400000) // Sumar un día en milisegundos para corregir la fecha
                         fechaNacimiento = TextFieldValue(date.toString())
                     }
                     showDatePicker = false
@@ -181,50 +188,87 @@ fun RegisterScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Registro de Usuario") }
-            )
-        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
-        Column(
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre") },
-                modifier = Modifier.fillMaxWidth()
+            // Imagen de fondo
+            Image(
+                painter = painterResource(id = R.drawable.background), // Usar la imagen c1.png
+                contentDescription = "Fondo de registro",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop // Ajustar para que cubra toda la pantalla
             )
 
-            OutlinedTextField(
-                value = apellido,
-                onValueChange = { apellido = it },
-                label = { Text("Apellido") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Contenido de la pantalla
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center, // Centrar verticalmente
+                horizontalAlignment = Alignment.CenterHorizontally // Centrar horizontalmente
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.study),
+                    contentDescription = "Study OSO Logo",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .padding(bottom = 16.dp), // Espacio debajo del logo
+                    contentScale = ContentScale.Fit
+                )
 
-            OutlinedTextField(
-                value = correo,
-                onValueChange = { correo = it },
-                label = { Text("Correo Electrónico") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
-            )
+                //texto Crear una cuenta
+                Text(
+                    text = "Crear una cuenta",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 16.dp) // Espacio debajo del título
+                )
 
-            OutlinedTextField(
-                value = contrasena,
-                onValueChange = { contrasena = it },
-                label = { Text("Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp) // Espacio debajo del campo
+                        .padding(horizontal = 16.dp)
+                )
+
+                OutlinedTextField(
+                    value = apellido,
+                    onValueChange = { apellido = it },
+                    label = { Text("Apellido") },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 8.dp) // Espacio debajo del campo
+                        .padding(horizontal = 16.dp)
+                )
+
+
+                OutlinedTextField(
+                    value = correo,
+                    onValueChange = { correo = it },
+                    label = { Text("Correo Electrónico") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 8.dp) // Espacio debajo del campo
+                        .padding(horizontal = 16.dp)
+                )
+
+                OutlinedTextField(
+                    value = contrasena,
+                    onValueChange = { contrasena = it },
+                    label = { Text("Contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 8.dp) // Espacio debajo del campo
+                        .padding(horizontal = 16.dp)
+                )
 
             OutlinedTextField(
                 value = confirmarContrasena,
@@ -236,7 +280,9 @@ fun RegisterScreen(
                 label = { Text("Confirmar Contraseña") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .padding(horizontal = 16.dp),
                 isError = confirmarContrasenaError,
                 supportingText = {
                     if (confirmarContrasenaError) {
@@ -262,23 +308,31 @@ fun RegisterScreen(
                     else MaterialTheme.colorScheme.outline
                 )
             )
-
-            OutlinedTextField(
-                value = fechaNacimiento,
-                onValueChange = { fechaNacimiento = it },
-                label = { Text("Fecha de Nacimiento") },
-                modifier = Modifier.fillMaxWidth(),
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true }) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Seleccionar fecha"
-                        )
+                OutlinedTextField(
+                    value = fechaNacimiento,
+                    onValueChange = { fechaNacimiento = it },
+                    label = { Text("Fecha de Nacimiento") },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 16.dp) // Espacio debajo del campo
+                        .padding(horizontal = 16.dp),
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Seleccionar fecha"
+                            )
+                        }
                     }
-                }
-            )
+                )
 
+                //Agregar texto de terminos y condiciones.
+                Text(
+                    text = "Al hacer clic en Registrarte, aceptas las Condiciones, la Política de privacidad y la Política de cookies.",
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp) // Espacio debajo del texto
+                )
             Button(
                 onClick = {
                     if (nombre.text.isBlank() || apellido.text.isBlank() ||
@@ -323,14 +377,17 @@ fun RegisterScreen(
             ) {
                 Text("Registrarse")
             }
-            TextButton(
-                onClick = { navController.navigate("login") }
-            ) {
-                Text("¿Tienes cuenta? Iniciar Sesión")
+                TextButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally), // Centrar el botón de texto
+                    onClick = { navController.navigate("login") }
+                ) {
+                    Text("¿Tienes cuenta? Iniciar Sesión")
+                }
             }
         }
     }
 }
+
 
 
 

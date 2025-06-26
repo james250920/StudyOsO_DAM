@@ -1,53 +1,29 @@
 package com.menfroyt.studyoso.presentation.auth
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModel
-import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModelFactory
+import com.menfroyt.studyoso.R
+import com.menfroyt.studyoso.ViewModel.usuario.*
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.repositories.UsuarioRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    navController: NavController
-) {
+fun LoginScreen(navController: NavController) {
+    // Estados y dependencias
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) }
     val usuarioRepository = remember { UsuarioRepository(db.UsuarioDao()) }
@@ -57,6 +33,7 @@ fun LoginScreen(
     val sessionManager = remember { SessionManager(context) }
     val scope = rememberCoroutineScope()
 
+    // Estados de UI
     var isLoading by remember { mutableStateOf(false) }
     var correo by remember { mutableStateOf(TextFieldValue("")) }
     var contrasena by remember { mutableStateOf(TextFieldValue("")) }
@@ -64,6 +41,7 @@ fun LoginScreen(
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
+    // Efectos
     LaunchedEffect(Unit) {
         if (sessionManager.isLoggedIn()) {
             navController.navigate("home/${sessionManager.getUserId()}") {
@@ -79,112 +57,192 @@ fun LoginScreen(
         }
     }
 
-    if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary // Color azul del tema
-            )
-        }
-    }
-
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Iniciar Sesión") }
-            )
-        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
+            // Fondo
+            BackgroundImage()
+
+            // Contenido principal
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                OutlinedTextField(
-                    value = correo,
-                    onValueChange = { correo = it },
-                    label = { Text("Correo Electrónico") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading
+                LogoImage()
+                LoginForm(
+                    correo = correo,
+                    contrasena = contrasena,
+                    isLoading = isLoading,
+                    onCorreoChange = { correo = it },
+                    onContrasenaChange = { contrasena = it }
                 )
-
-                OutlinedTextField(
-                    value = contrasena,
-                    onValueChange = { contrasena = it },
-                    label = { Text("Contraseña") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading
+                LoginButton(
+                    isLoading = isLoading,
+                    onLogin = {
+                        handleLogin(
+                            correo = correo.text,
+                            contrasena = contrasena.text,
+                            scope = scope,
+                            usuarioViewModel = usuarioViewModel,
+                            sessionManager = sessionManager,
+                            navController = navController,
+                            onError = { mensaje ->
+                                errorMessage = mensaje
+                                showError = true
+                            },
+                            setLoading = { isLoading = it }
+                        )
+                    }
                 )
-
-                Button(
-                    onClick = {
-                        if (correo.text.isBlank() || contrasena.text.isBlank()) {
-                            errorMessage = "Ingrese correo y contraseña"
-                            showError = true
-                            return@Button
-                        }
-
-                        scope.launch {
-                            isLoading = true
-                            delay(1500)
-
-                            usuarioViewModel.login(
-                                correo.text.trim(),
-                                contrasena.text.trim(),
-                                onSuccess = { usuario ->
-                                    sessionManager.saveSession(usuario.idUsuario, correo.text.trim())
-                                    isLoading = false
-                                    navController.navigate("home/${usuario.idUsuario}") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                },
-                                onError = { mensaje ->
-                                    isLoading = false
-                                    errorMessage = mensaje
-                                    showError = true
-                                }
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    enabled = !isLoading
-                ) {
-                    Text("Iniciar Sesión")
-                }
-
-                TextButton(
-                    onClick = { navController.navigate("register") },
-                    enabled = !isLoading
-                ) {
-                    Text("¿No tienes cuenta? Regístrate")
-                }
+                RegisterButton(
+                    isLoading = isLoading,
+                    navController = navController
+                )
             }
 
+            // Indicador de carga
             if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .align(Alignment.Center)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF2196F3) // Azul Material Design
-                    )
-                }
+                LoadingIndicator()
             }
         }
+    }
+}
+
+@Composable
+private fun BackgroundImage() {
+    Image(
+        painter = painterResource(id = R.drawable.backgroundlogin),
+        contentDescription = "Background Image",
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+private fun LogoImage() {
+    Image(
+        painter = painterResource(id = R.drawable.study),
+        contentDescription = "Study OSO Logo",
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(150.dp),
+        contentScale = ContentScale.Fit
+    )
+}
+
+@Composable
+private fun LoginForm(
+    correo: TextFieldValue,
+    contrasena: TextFieldValue,
+    isLoading: Boolean,
+    onCorreoChange: (TextFieldValue) -> Unit,
+    onContrasenaChange: (TextFieldValue) -> Unit
+) {
+    OutlinedTextField(
+        value = correo,
+        onValueChange = onCorreoChange,
+        label = { Text("Correo Electrónico") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        enabled = !isLoading
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    OutlinedTextField(
+        value = contrasena,
+        onValueChange = onContrasenaChange,
+        label = { Text("Contraseña") },
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        enabled = !isLoading
+    )
+}
+
+@Composable
+private fun LoginButton(
+    isLoading: Boolean,
+    onLogin: () -> Unit
+) {
+    Spacer(modifier = Modifier.height(16.dp))
+    Button(
+        onClick = onLogin,
+        modifier = Modifier
+            .fillMaxWidth(0.6f)
+            .height(50.dp),
+        enabled = !isLoading
+    ) {
+        Text("Iniciar Sesión")
+    }
+}
+
+@Composable
+private fun RegisterButton(
+    isLoading: Boolean,
+    navController: NavController
+) {
+    Spacer(modifier = Modifier.height(8.dp))
+    TextButton(
+        onClick = { navController.navigate("register") },
+        enabled = !isLoading
+    ) {
+        Text("¿No tienes cuenta? Regístrate")
+    }
+}
+
+@Composable
+private fun LoadingIndicator() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+private fun handleLogin(
+    correo: String,
+    contrasena: String,
+    scope: kotlinx.coroutines.CoroutineScope,
+    usuarioViewModel: UsuarioViewModel,
+    sessionManager: SessionManager,
+    navController: NavController,
+    onError: (String) -> Unit,
+    setLoading: (Boolean) -> Unit
+) {
+    if (correo.isBlank() || contrasena.isBlank()) {
+        onError("Ingrese correo y contraseña")
+        return
+    }
+
+    scope.launch {
+        setLoading(true)
+        usuarioViewModel.login(
+            correo.trim(),
+            contrasena.trim(),
+            onSuccess = { usuario ->
+                sessionManager.saveSession(usuario.idUsuario, correo.trim())
+                setLoading(false)
+                navController.navigate("home/${usuario.idUsuario}") {
+                    popUpTo("login") { inclusive = true }
+                }
+            },
+            onError = { mensaje ->
+                setLoading(false)
+                onError(mensaje)
+            }
+        )
     }
 }
