@@ -205,14 +205,7 @@ private fun CursoItem(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Eliminar curso",
-                modifier = Modifier
-                    .clickable(onClick = onDelete)
-                    .padding(8.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
+
         }
     }
 }
