@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +23,7 @@ import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.entities.Tarea
 import com.menfroyt.studyoso.data.repositories.TareaRepository
+import androidx.compose.material.icons.filled.DateRange
 
 
 @Composable
@@ -50,9 +52,9 @@ fun ListTaskScreen(
             TaskList(
                 tareas = tareas,
                 onDeleteTask = { tareaViewModel.eliminarTarea(it) },
+                onUpdateTask = { tareaViewModel.actualizarTarea(it) },
                 onTaskClick = { tarea ->
-                    // Aquí puedes implementar navegación a detalle o edición de tarea
-                    // Ejemplo: onScreenSelected("DetalleTarea/${tarea.idTarea}")
+                    // Implementar navegación si es necesario
                 }
             )
         }
@@ -92,6 +94,7 @@ private fun EmptyState() {
 private fun TaskList(
     tareas: List<Tarea>,
     onDeleteTask: (Tarea) -> Unit,
+    onUpdateTask: (Tarea) -> Unit,
     onTaskClick: (Tarea) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -106,7 +109,8 @@ private fun TaskList(
             TaskItem(
                 tarea = tarea,
                 onClick = { onTaskClick(tarea) },
-                onDelete = { onDeleteTask(tarea) }
+                onDelete = { onDeleteTask(tarea) },
+                onUpdate = { onUpdateTask(it) }
             )
         }
     }
@@ -117,12 +121,13 @@ private fun TaskItem(
     tarea: Tarea,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    onUpdate: (Tarea) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var mostrarDialogoActualizar by remember { mutableStateOf(false) }
+
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -152,6 +157,15 @@ private fun TaskItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            IconButton(onClick = { mostrarDialogoActualizar = true }) {
+                Icon(
+                    imageVector = Icons.Filled.Create,
+                    contentDescription = "Actualizar tarea",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
@@ -160,5 +174,150 @@ private fun TaskItem(
                 )
             }
         }
+
+        if (mostrarDialogoActualizar) {
+            DialogoActualizarTarea(
+                tarea = tarea,
+                onDismiss = { mostrarDialogoActualizar = false },
+                onConfirm = { tareaActualizada ->
+                    onUpdate(tareaActualizada)
+                    mostrarDialogoActualizar = false
+                }
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DialogoActualizarTarea(
+    tarea: Tarea,
+    onDismiss: () -> Unit,
+    onConfirm: (Tarea) -> Unit
+) {
+    var descripcionTarea by remember { mutableStateOf(tarea.descripcion) }
+    var esImportante by remember { mutableStateOf(tarea.esImportante) }
+    var esUrgente by remember { mutableStateOf(tarea.esUrgente) }
+    var fechaVencimiento by remember { mutableStateOf(tarea.fechaVencimiento) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = null,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= System.currentTimeMillis()
+            }
+        }
+    )
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                        fechaVencimiento = formatter.format(java.util.Date(millis))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Actualizar Tarea") },
+        text = {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = descripcionTarea,
+                    onValueChange = { descripcionTarea = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text("¿Es importante?", style = MaterialTheme.typography.bodyLarge)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    RadioButton(
+                        selected = esImportante,
+                        onClick = { esImportante = true }
+                    )
+                    Text("Sí", modifier = Modifier.padding(start = 8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
+                    RadioButton(
+                        selected = !esImportante,
+                        onClick = { esImportante = false }
+                    )
+                    Text("No", modifier = Modifier.padding(start = 8.dp))
+                }
+
+                Text("¿Es urgente?", style = MaterialTheme.typography.bodyLarge)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    RadioButton(
+                        selected = esUrgente,
+                        onClick = { esUrgente = true }
+                    )
+                    Text("Sí", modifier = Modifier.padding(start = 8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
+                    RadioButton(
+                        selected = !esUrgente,
+                        onClick = { esUrgente = false }
+                    )
+                    Text("No", modifier = Modifier.padding(start = 8.dp))
+                }
+
+                OutlinedTextField(
+                    value = fechaVencimiento,
+                    onValueChange = { },
+                    label = { Text("Fecha de vencimiento") },
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Seleccionar fecha"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm(tarea.copy(
+                    descripcion = descripcionTarea,
+                    esImportante = esImportante,
+                    esUrgente = esUrgente,
+                    fechaVencimiento = fechaVencimiento
+                ))
+            }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }

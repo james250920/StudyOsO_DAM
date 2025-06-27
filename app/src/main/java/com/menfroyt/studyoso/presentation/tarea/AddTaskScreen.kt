@@ -25,7 +25,7 @@ import com.menfroyt.studyoso.data.entities.Curso
 import com.menfroyt.studyoso.data.entities.Tarea
 import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.TareaRepository
-
+import androidx.compose.material.icons.filled.Clear
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +65,6 @@ fun AddTaskScreen(
         }
     }
 
-    // Cargar cursos para el usuario
     LaunchedEffect(usuarioId) {
         cursoViewModel.cargarCursos(usuarioId)
         cursoViewModel.cursos.collect { lista ->
@@ -77,7 +76,6 @@ fun AddTaskScreen(
         initialSelectedDateMillis = null,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                // Permite seleccionar fechas desde hoy en adelante
                 return utcTimeMillis >= System.currentTimeMillis()
             }
         }
@@ -89,8 +87,7 @@ fun AddTaskScreen(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val formatter =
-                            java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
                         fechaVencimiento = formatter.format(java.util.Date(millis))
                     }
                     showDatePicker = false
@@ -107,6 +104,7 @@ fun AddTaskScreen(
             DatePicker(state = datePickerState)
         }
     }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -118,17 +116,13 @@ fun AddTaskScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
-        ){
+        ) {
             IconButton(
                 onClick = { onScreenSelected("ListTaskScreen") },
-                modifier = Modifier
-                    .padding(start = 0.dp, end = 8.dp),
+                modifier = Modifier.padding(start = 0.dp, end = 8.dp),
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color(0xFF3355ff),
-
-                    )
-
-
+                    containerColor = Color(0xFF3355ff)
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBackIosNew,
@@ -137,28 +131,45 @@ fun AddTaskScreen(
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = "Agregar Tarea",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(vertical = 16.dp),
-            textAlign = TextAlign.Center
-        )
+            Text(
+                text = "Agregar Tarea",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(vertical = 16.dp),
+                textAlign = TextAlign.Center
+            )
         }
-        // Dropdown Cursos
+
         ExposedDropdownMenuBox(
             expanded = expandidoCurso,
             onExpandedChange = { expandidoCurso = it }
         ) {
-            OutlinedTextField(
-                value = cursoSeleccionado?.nombreCurso ?: "",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Seleccionar Curso") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandidoCurso) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = cursoSeleccionado?.nombreCurso ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Curso (Opcional)") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandidoCurso) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .menuAnchor()
+                )
+                if (cursoSeleccionado != null) {
+                    IconButton(
+                        onClick = { cursoSeleccionado = null }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Limpiar selección",
+                            tint = Color(0xFF3355ff)
+                        )
+                    }
+                }
+            }
             ExposedDropdownMenu(
                 expanded = expandidoCurso,
                 onDismissRequest = { expandidoCurso = false }
@@ -197,9 +208,7 @@ fun AddTaskScreen(
             opcionesImportante.forEach { (texto, valor) ->
                 Row(
                     modifier = Modifier
-                        .selectable(
-                            selected = esImportante == valor,
-                            onClick = { esImportante = valor })
+                        .selectable(selected = esImportante == valor, onClick = { esImportante = valor })
                         .padding(end = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -210,7 +219,7 @@ fun AddTaskScreen(
                             selectedColor = Color(0xFF3355ff),
                             unselectedColor = Color(0xFF3355ff).copy(alpha = 0.6f)
                         )
-                        )
+                    )
                     Text(text = texto)
                 }
             }
@@ -269,31 +278,22 @@ fun AddTaskScreen(
         Button(
             onClick = {
                 when {
-                    cursoSeleccionado == null -> {
-                        errorMessage = "Selecciona un curso"
-                        showError = true
-                    }
-
                     descripcionTarea.isBlank() -> {
                         errorMessage = "La descripción es obligatoria"
                         showError = true
                     }
-
                     esImportante == null -> {
                         errorMessage = "Indica si la tarea es importante"
                         showError = true
                     }
-
                     esUrgente == null -> {
                         errorMessage = "Indica si la tarea es urgente"
                         showError = true
                     }
-
                     fechaVencimiento.isBlank() -> {
                         errorMessage = "Selecciona la fecha de vencimiento"
                         showError = true
                     }
-
                     else -> {
                         val nuevaTarea = Tarea(
                             descripcion = descripcionTarea.trim(),
@@ -303,7 +303,7 @@ fun AddTaskScreen(
                             fechaCreacion = LocalDate.now().toString(),
                             estado = "Pendiente",
                             idUsuario = usuarioId,
-                            idCurso = cursoSeleccionado!!.idCurso
+                            idCurso = cursoSeleccionado?.idCurso
                         )
                         tareaViewModel.agregarTarea(nuevaTarea)
                         onScreenSelected("ListTaskScreen")

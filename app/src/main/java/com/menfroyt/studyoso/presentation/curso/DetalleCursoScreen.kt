@@ -332,13 +332,19 @@ internal fun PruebasSection(
         Button(
             onClick = { onScreenSelected("AgregarCalificacion") },
             modifier = Modifier.fillMaxWidth(),
+            enabled = tiposPrueba.isNotEmpty(), // Deshabilita el botón si no hay pruebas
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3355ff)
+                containerColor = if (tiposPrueba.isNotEmpty()) Color(0xFF3355ff) else Color.Gray
             )
         ) {
-            Text("Agregar calificación")
+            Text(
+                text = if (tiposPrueba.isNotEmpty())
+                    "Agregar calificación"
+                else
+                    "Agregue una prueba primero",
+                color = Color.White
+            )
         }
-
         DialogoAgregarPrueba(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
