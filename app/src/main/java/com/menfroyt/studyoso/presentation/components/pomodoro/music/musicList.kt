@@ -2,9 +2,17 @@ package esan.mendoza.teststudyoso.presentation.components.pomodoro.music
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.MusicOff
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -13,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 
 
 @Composable
@@ -113,83 +122,212 @@ fun MusicListDialog(
         // Resto del código del AlertDialog...
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(text = "Lista de Música") },
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(0.95f),
+            properties = DialogProperties(
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false
+            ),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MusicNote,
+                        contentDescription = null,
+                        tint = Color(0xFF3355ff),
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Lista de Música",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
                     if (errorMessage != null) {
-                        Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+                        ErrorMessage(errorMessage!!)
                     } else if (audioFiles.isEmpty()) {
-                        Text(text = "No se encontraron archivos MP3")
+                        EmptyState()
                     } else {
                         audioFiles.forEachIndexed { index, fileName ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { playFile(fileName, index) }
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = fileName,
-                                    color = if (selectedFile == fileName)
-                                        Color(0xFF3355ff)
-                                    else
-                                        MaterialTheme.colorScheme.onSurface
-                                )
-                                if (selectedFile == fileName) {
-                                    IconButton(
-                                        onClick = {
-                                            if (isPlaying) {
-                                                mediaPlayer?.pause()
-                                            } else {
-                                                mediaPlayer?.start()
-                                            }
-                                            onIsPlayingChange(!isPlaying)
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = if (isPlaying)
-                                                Icons.Default.Pause
-                                            else
-                                                Icons.Default.PlayArrow,
-                                            contentDescription = if (isPlaying) "Pausar" else "Reproducir"
-                                        )
-                                    }
+                            MusicItem(
+                                fileName = fileName,
+                                isSelected = selectedFile == fileName,
+                                isPlaying = isPlaying && selectedFile == fileName,
+                                onItemClick = { playFile(fileName, index) },
+                                onPlayPauseClick = {
+                                    if (isPlaying) mediaPlayer?.pause() else mediaPlayer?.start()
+                                    onIsPlayingChange(!isPlaying)
                                 }
-                            }
+                            )
                         }
                     }
                 }
             },
             confirmButton = {
-                Button(onClick = onConfirm,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF3355ff),
-                        contentColor = Color.White
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Aceptar")
-
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    mediaPlayer?.apply {
-                        stop()
-                        release()
+                    Button(
+                        onClick = {
+                            mediaPlayer?.apply {
+                                stop()
+                                release()
+                            }
+                            onMediaPlayerChange(null)
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF3355ff).copy(alpha = 0.8f),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Cancelar", style = MaterialTheme.typography.labelLarge)
                     }
-                    onMediaPlayerChange(null)
-                    onDismiss()
-                },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF3355ff),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Cancelar")
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF3355ff),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Aceptar", style = MaterialTheme.typography.labelLarge)
+                    }
                 }
             }
+        )
+    }
+}
+
+@Composable
+private fun MusicItem(
+    fileName: String,
+    isSelected: Boolean,
+    isPlaying: Boolean,
+    onItemClick: () -> Unit,
+    onPlayPauseClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable(onClick = onItemClick),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                Color(0xFF3355ff).copy(alpha = 0.1f)
+            else
+                MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = fileName.removeSuffix(".mp3"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isSelected)
+                    Color(0xFF3355ff)
+                else
+                    MaterialTheme.colorScheme.onSurface
+            )
+            if (isSelected) {
+                IconButton(
+                    onClick = onPlayPauseClick,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = Color(0xFF3355ff).copy(alpha = 0.1f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying)
+                            Icons.Default.Pause
+                        else
+                            Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pausar" else "Reproducir",
+                        tint = Color(0xFF3355ff)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorMessage(message: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Error,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.MusicOff,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "No se encontraron archivos MP3",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

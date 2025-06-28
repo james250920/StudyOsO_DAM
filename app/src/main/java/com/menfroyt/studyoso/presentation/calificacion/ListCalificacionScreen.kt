@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -76,7 +75,10 @@ fun ListCalificacionScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             if (cursos.isEmpty()) {
-                EmptyState()
+                EmptyState(
+                    modifier = Modifier.fillMaxSize(),
+                    onScreenSelected = onScreenSelected // <--- Aquí va el cambio
+                )
             } else {
                 CursoList(
                     cursos = cursos,
@@ -87,20 +89,21 @@ fun ListCalificacionScreen(
                 )
             }
         }
-
-        FloatingActionButton(
-            onClick = { onScreenSelected("AgregarCalificacion") },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            containerColor = Color(0xFF3355ff),
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = "Agregar Curso",
-                modifier = Modifier.size(24.dp)
-            )
+        if (cursos.isNotEmpty()) {
+            FloatingActionButton(
+                onClick = { onScreenSelected("AgregarCalificacion") },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = Color(0xFF3355ff),
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Agregar Curso",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -139,7 +142,11 @@ private fun CursoList(
 
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(
+    modifier: Modifier = Modifier,
+    onScreenSelected: (String) -> Unit = { } // <--- Aquí va el cambio
+
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,12 +154,18 @@ private fun EmptyState() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.AddToPhotos,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = Color(0xFF3355ff)
-        )
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clickable { onScreenSelected("AgregarCursos") }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AddToPhotos,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = Color(0xFF3355ff)
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "No hay cursos agregados",
