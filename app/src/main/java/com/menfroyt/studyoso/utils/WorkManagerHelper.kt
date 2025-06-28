@@ -8,6 +8,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.compose.runtime.MutableState
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import com.menfroyt.studyoso.MainActivity
@@ -65,5 +66,18 @@ class WorkManagerHelper(private val context: Context) {
                 }
             }
         }
+    }
+
+    fun programarNotificacionPomodoro(isBreak: Boolean, sessionCount: Int) {
+        val notificationData = workDataOf(
+            "isBreak" to isBreak,
+            "sessionCount" to sessionCount
+        )
+
+        val request = OneTimeWorkRequestBuilder<PomodoroNotificationWorker>()
+            .setInputData(notificationData)
+            .build()
+
+        worker.enqueue(request)
     }
 }
