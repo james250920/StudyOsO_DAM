@@ -11,14 +11,17 @@ import androidx.work.OneTimeWorkRequestBuilder
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import com.menfroyt.studyoso.MainActivity
+import com.menfroyt.studyoso.presentation.auth.SessionManager
 
 class WorkManagerHelper(private val context: Context) {
 
     private val worker: WorkManager = WorkManager.getInstance(context)
 
     init {
-        // Programar la verificación periódica de tareas
-        NotificationWorker.programarVerificacionTareas(context)
+        val sessionManager = SessionManager(context)
+        if (sessionManager.isLoggedIn()) {
+            NotificationWorker.programarVerificacionTareas(context)
+        }
     }
 
     // Método para configurar y ejecutar el trabajo

@@ -55,6 +55,7 @@ buildscript {
     }
 }
 dependencies {
+    implementation(libs.androidx.foundation.android)
     val room_version = "2.7.1"
     val nav_version = "2.9.0"
     val composeBom = platform("androidx.compose:compose-bom:2025.05.00")

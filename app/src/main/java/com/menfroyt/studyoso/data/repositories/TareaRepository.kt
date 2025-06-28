@@ -5,7 +5,7 @@ import com.menfroyt.studyoso.data.entities.Tarea
 import kotlinx.coroutines.flow.Flow
 
 class TareaRepository(private val dao: TareaDao) {
-    fun getTareasByUsuario(userId: Int): Flow<List<Tarea>> = dao.getTareasByUsuario(userId)
+    suspend fun getTareasByUsuario(userId: Int): Flow<List<Tarea>> = dao.getTareasByUsuario(userId)
 
     fun getTareasByCurso(cursoId: Int): Flow<List<Tarea>> = dao.getTareasByCurso(cursoId)
 
@@ -15,4 +15,9 @@ class TareaRepository(private val dao: TareaDao) {
 
     suspend fun delete(tarea: Tarea) = dao.delete(tarea)
     suspend fun getAllTareas(): List<Tarea> = dao.getAllTareas()
+    suspend fun getTareasByUsuarioId(userId: Int): List<Tarea> {
+        return dao.getAllTareas().filter { it.idUsuario== userId }
+    }
+
+
 }

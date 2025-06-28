@@ -3,13 +3,16 @@ package com.menfroyt.studyoso.utils
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.work.*
+import com.menfroyt.studyoso.MainActivity
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.repositories.TareaRepository
 import kotlinx.coroutines.runBlocking
@@ -18,110 +21,103 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import com.menfroyt.studyoso.R
 import com.menfroyt.studyoso.data.entities.Tarea
+import com.menfroyt.studyoso.navigation.NavigationConstants
+import com.menfroyt.studyoso.presentation.auth.SessionManager
+import kotlinx.coroutines.flow.forEach
 
 class NotificationWorker(context: Context, workerParameters: WorkerParameters): Worker(context, workerParameters) {
 
     private val db = AppDatabase.getInstance(applicationContext)
     private val tareaRepository = TareaRepository(db.TareaDao())
 
-    override fun doWork(): Result {
-        Log.d("NotificationWorker", "Verificando tareas pendientes...")
+    override  fun doWork(): Result {
+        Log.d("NotificationWorker", "Iniciando verificación de tareas...")
 
-        val tareasNotificar = verificarTareasVencidas()
-        Log.d("NotificationWorker", "Tareas encontradas: ${tareasNotificar.size}")
-
-        if (tareasNotificar.isNotEmpty()) {
-            for ((index, par) in tareasNotificar.withIndex()) {
-                val tarea = par.first
-                val estado = par.second
-
-                val titulo = when(estado) {
-                    "VENCIDA" -> "¡Tarea vencida!"
-                    "HOY" -> "¡Tarea vence hoy!"
-                    "MAÑANA" -> "¡Tarea vence mañana!"
-                    else -> "Tarea pendiente"
-                }
-
-                val mensaje = when(estado) {
-                    "VENCIDA" -> "La tarea \"${tarea.descripcion}\" ha vencido"
-                    "HOY" -> "La tarea \"${tarea.descripcion}\" vence hoy"
-                    "MAÑANA" -> "La tarea \"${tarea.descripcion}\" vence mañana"
-                    else -> "La tarea \"${tarea.descripcion}\" está pendiente"
-                }
-
-                Log.d("NotificationWorker", "Mostrando notificación: $titulo - $mensaje")
-                showNotification(titulo, mensaje, index)
+        try {
+            val sessionManager = SessionManager(applicationContext)
+            if (!sessionManager.isLoggedIn()) {
+                Log.d("NotificationWorker", "No hay sesión activa, omitiendo verificación")
+                return Result.success()
             }
-        }
 
-        return Result.success()
+            runBlocking {
+                val tareasNotificar = verificarTareasVencidas()
+                Log.d("NotificationWorker", "Tareas encontradas para notificar: ${tareasNotificar.size}")
+
+                tareasNotificar.forEachIndexed { index, par ->
+                    val tarea = par.first
+                    val estado = par.second
+                    val titulo = when(estado) {
+                        "VENCIDA" -> "¡Tarea vencida!"
+                        "HOY" -> "¡Tarea vence hoy!"
+                        "MAÑANA" -> "¡Tarea vence mañana!"
+                        else -> "Tarea pendiente"
+                    }
+
+                    val mensaje = when(estado) {
+                        "VENCIDA" -> "La tarea \"${tarea.descripcion}\" ha vencido"
+                        "HOY" -> "La tarea \"${tarea.descripcion}\" vence hoy"
+                        "MAÑANA" -> "La tarea \"${tarea.descripcion}\" vence mañana"
+                        else -> "La tarea \"${tarea.descripcion}\" está pendiente"
+                    }
+
+                    showNotification(titulo, mensaje, index)
+                }
+            }
+
+            return Result.success()
+        } catch (e: Exception) {
+            Log.e("NotificationWorker", "Error en doWork: ${e.message}")
+            return Result.failure()
+        }
     }
 
-    private fun verificarTareasVencidas(): List<Pair<Tarea, String>> {
+    private suspend fun verificarTareasVencidas(): List<Pair<Tarea, String>> {
         val tareasANotificar = mutableListOf<Pair<Tarea, String>>()
+        val sessionManager = SessionManager(applicationContext)
+
+        if (!sessionManager.isLoggedIn()) {
+            Log.d("NotificationWorker", "No hay sesión activa")
+            return emptyList()
+        }
+
+        val usuarioActual = sessionManager.getUserId()
         val fechaActual = LocalDate.now()
         val fechaMañana = fechaActual.plusDays(1)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-        Log.d("NotificationWorker", "Fecha actual: $fechaActual, Fecha mañana: $fechaMañana")
-
         try {
-            // Obtener todas las tareas directamente (sin filtrar por usuario)
-            val todasLasTareas = runBlocking {
-                tareaRepository.getAllTareas()
+            val tareasUsuario = runBlocking {
+                tareaRepository.getAllTareas().filter { it.idUsuario == usuarioActual }
             }
 
-            Log.d("NotificationWorker", "Total tareas en BD: ${todasLasTareas.size}")
-
-            todasLasTareas.forEach { tarea ->
+            tareasUsuario.forEach { tarea ->
                 try {
-                    val fechaVencimientoStr = tarea.fechaVencimiento
-                    Log.d("NotificationWorker",
-                        "Evaluando tarea: ${tarea.descripcion}, Vence: $fechaVencimientoStr, Estado: ${tarea.estado}")
-
-                    val fechaVencimiento = LocalDate.parse(fechaVencimientoStr, formatter)
-
-                    // Comparaciones de fecha
-                    val esHoy = fechaVencimiento.isEqual(fechaActual)
-                    val esMañana = fechaVencimiento.isEqual(fechaMañana)
-                    val yaVencio = fechaVencimiento.isBefore(fechaActual)
-
-                    Log.d("NotificationWorker",
-                        "Comparaciones: Vence hoy=$esHoy, Vence mañana=$esMañana, Ya venció=$yaVencio")
-
-                    // Comprobar si la tarea está pendiente
+                    val fechaVencimiento = LocalDate.parse(tarea.fechaVencimiento, formatter)
                     if (tarea.estado == "Pendiente") {
                         when {
-                            yaVencio -> {
-                                Log.d("NotificationWorker", "Tarea VENCIDA: ${tarea.descripcion}")
+                            fechaVencimiento.isBefore(fechaActual) ->
                                 tareasANotificar.add(Pair(tarea, "VENCIDA"))
-                            }
-                            esHoy -> {
-                                Log.d("NotificationWorker", "Tarea vence HOY: ${tarea.descripcion}")
+                            fechaVencimiento.isEqual(fechaActual) ->
                                 tareasANotificar.add(Pair(tarea, "HOY"))
-                            }
-                            esMañana -> {
-                                Log.d("NotificationWorker", "Tarea vence MAÑANA: ${tarea.descripcion}")
+                            fechaVencimiento.isEqual(fechaMañana) ->
                                 tareasANotificar.add(Pair(tarea, "MAÑANA"))
-                            }
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("NotificationWorker", "Error al procesar tarea: ${e.message}")
-                    e.printStackTrace()
+                    Log.e("NotificationWorker", "Error procesando tarea: ${e.message}")
                 }
             }
         } catch (e: Exception) {
             Log.e("NotificationWorker", "Error general: ${e.message}")
-            e.printStackTrace()
         }
 
-        Log.d("NotificationWorker", "Tareas a notificar: ${tareasANotificar.size}")
         return tareasANotificar
     }
 
+
     private fun showNotification(title: String, desc: String, notificationId: Int = 1) {
-        // Verificar si tenemos permisos para notificaciones
+        // Verificar permisos de notificaciones
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     applicationContext,
@@ -132,29 +128,50 @@ class NotificationWorker(context: Context, workerParameters: WorkerParameters): 
             }
         }
 
-        // Resto del código para mostrar la notificación...
         Log.d("NotificationWorker", "Mostrando notificación: $title")
 
         val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "task_deadline_channel"
         val channelName = "Task Deadlines"
 
-        // Verificar si la versión de Android es compatible con canales de notificación
+        // Obtener el userId de SessionManager
+        val sessionManager = SessionManager(applicationContext)
+        val userId = sessionManager.getUserId()
+        // Crear Intent para abrir la lista de tareas
+        val intent = Intent(applicationContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(NavigationConstants.EXTRA_SCREEN, NavigationConstants.SCREEN_LIST_TASK)
+            putExtra("userId", userId) // Añadir el userId al intent
+        }
+
+        // Crear PendingIntent
+        val pendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Configurar canal de notificación
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
             manager.createNotificationChannel(channel)
         }
 
-        // Crear y mostrar la notificación
+        // Crear y mostrar la notificación con el PendingIntent
         val builder = NotificationCompat.Builder(applicationContext, channelId)
             .setContentTitle(title)
             .setContentText(desc)
             .setSmallIcon(R.drawable.calificacion)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setAutoCancel(true) // La notificación desaparece al tocarla
+            .setContentIntent(pendingIntent) // Agregar el PendingIntent
 
         manager.notify(notificationId, builder.build())
     }
+
+
 
     companion object {
         const val WORK_RESULT = "work_result"
