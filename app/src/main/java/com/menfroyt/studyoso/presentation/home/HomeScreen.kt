@@ -43,11 +43,12 @@ import com.menfroyt.studyoso.presentation.components.pomodoro.PomodoroScreen
 @Composable
 fun Home(
     navController: NavController,
-    usuarioId: Int
-    ) {
+    usuarioId: Int,
+    initialScreen: String = "Principal"
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var selectedScreen by remember { mutableStateOf("Principal") }
+    var selectedScreen by remember { mutableStateOf(initialScreen) }
     var isDarkTheme by remember { mutableStateOf(false) }
 
     MaterialTheme(

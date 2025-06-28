@@ -21,6 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.menfroyt.studyoso.utils.PomodoroNotificationWorker
 import esan.mendoza.teststudyoso.presentation.components.pomodoro.music.MusicListDialog
 import esan.mendoza.teststudyoso.presentation.components.pomodoro.music.pomodoroSettingDialog
 import kotlinx.coroutines.delay
@@ -32,7 +36,7 @@ fun PomodoroScreen(
 ) {
     val showMusicDialog = rememberSaveable { mutableStateOf(false) }
     val showPomodoroDialog = rememberSaveable { mutableStateOf(false) }
-
+    val context = LocalContext.current
     // Estados del temporizador
     var isRunning by rememberSaveable { mutableStateOf(false) }
     var currentSeconds by rememberSaveable { mutableStateOf(25 * 60) } // 25 minutos por defecto
@@ -53,6 +57,19 @@ fun PomodoroScreen(
             if (currentSeconds == 0) {
                 isRunning = false
                 sessionCount++
+
+                // Programar notificación
+                val notificationData = workDataOf(
+                    "isBreak" to isBreak,
+                    "sessionCount" to sessionCount
+                )
+
+                val notificationWork = OneTimeWorkRequestBuilder<PomodoroNotificationWorker>()
+                    .setInputData(notificationData)
+                    .build()
+
+                WorkManager.getInstance(context)
+                    .enqueue(notificationWork)
 
                 // Determinar el siguiente intervalo
                 if (!isBreak) {

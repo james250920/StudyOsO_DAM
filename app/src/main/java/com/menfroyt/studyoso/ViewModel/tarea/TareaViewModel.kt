@@ -60,4 +60,10 @@ class TareaViewModel(private val repository: TareaRepository) : ViewModel() {
             _tareas.value = repository.getAllTareas()
         }
     }
+
+    fun cargarTareasPorUsuarioId(usuarioId: Int) {
+        viewModelScope.launch {
+            _tareas.value = repository.getTareasByUsuarioId(usuarioId)
+        }
+    }
 }

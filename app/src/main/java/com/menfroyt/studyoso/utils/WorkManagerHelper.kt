@@ -8,17 +8,21 @@ import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.compose.runtime.MutableState
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import com.menfroyt.studyoso.MainActivity
+import com.menfroyt.studyoso.presentation.auth.SessionManager
 
 class WorkManagerHelper(private val context: Context) {
 
     private val worker: WorkManager = WorkManager.getInstance(context)
 
     init {
-        // Programar la verificación periódica de tareas
-        NotificationWorker.programarVerificacionTareas(context)
+        val sessionManager = SessionManager(context)
+        if (sessionManager.isLoggedIn()) {
+            NotificationWorker.programarVerificacionTareas(context)
+        }
     }
 
     // Método para configurar y ejecutar el trabajo
@@ -62,5 +66,18 @@ class WorkManagerHelper(private val context: Context) {
                 }
             }
         }
+    }
+
+    fun programarNotificacionPomodoro(isBreak: Boolean, sessionCount: Int) {
+        val notificationData = workDataOf(
+            "isBreak" to isBreak,
+            "sessionCount" to sessionCount
+        )
+
+        val request = OneTimeWorkRequestBuilder<PomodoroNotificationWorker>()
+            .setInputData(notificationData)
+            .build()
+
+        worker.enqueue(request)
     }
 }
