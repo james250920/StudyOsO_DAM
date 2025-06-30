@@ -3,6 +3,9 @@ package com.menfroyt.studyoso.presentation.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -143,6 +146,8 @@ private fun LoginForm(
     onCorreoChange: (TextFieldValue) -> Unit,
     onContrasenaChange: (TextFieldValue) -> Unit
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         value = correo,
         onValueChange = onCorreoChange,
@@ -160,13 +165,25 @@ private fun LoginForm(
         value = contrasena,
         onValueChange = onContrasenaChange,
         label = { Text("Contraseña") },
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        trailingIcon = {
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(
+                    imageVector = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff,
+                    contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                )
+            }
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 32.dp),
         enabled = !isLoading
     )
+
+
 }
 
 @Composable
