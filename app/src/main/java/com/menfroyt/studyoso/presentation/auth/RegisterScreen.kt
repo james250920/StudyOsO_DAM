@@ -37,7 +37,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.text.style.TextAlign
 import java.text.SimpleDateFormat
 import java.util.Locale
-
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.VisualTransformation
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
@@ -69,7 +71,8 @@ fun RegisterScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
-
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
         selectableDates = object : SelectableDates {
@@ -259,55 +262,77 @@ fun RegisterScreen(
                         .padding(horizontal = 16.dp)
                 )
 
+
                 OutlinedTextField(
                     value = contrasena,
                     onValueChange = { contrasena = it },
                     label = { Text("Contraseña") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(bottom = 8.dp) // Espacio debajo del campo
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff,
+                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                         .padding(horizontal = 16.dp)
                 )
 
-            OutlinedTextField(
-                value = confirmarContrasena,
-                onValueChange = {
-                    confirmarContrasena = it
-                    passwordsMatch = contrasena.text == it.text
-                    confirmarContrasenaError = it.text.isNotEmpty() && !passwordsMatch
-                },
-                label = { Text("Confirmar Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .padding(horizontal = 16.dp),
-                isError = confirmarContrasenaError,
-                supportingText = {
-                    if (confirmarContrasenaError) {
-                        Text(
-                            text = "Las contraseñas no coinciden",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    } else if (confirmarContrasena.text.isNotEmpty() && passwordsMatch) {
-                        Text(
-                            text = "Las contraseñas coinciden",
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
-                        if (passwordsMatch) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.outline,
-                    unfocusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
-                        if (passwordsMatch) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.outline
+                OutlinedTextField(
+                    value = confirmarContrasena,
+                    onValueChange = {
+                        confirmarContrasena = it
+                        passwordsMatch = contrasena.text == it.text
+                        confirmarContrasenaError = it.text.isNotEmpty() && !passwordsMatch
+                    },
+                    label = { Text("Confirmar Contraseña") },
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = 16.dp),
+                    trailingIcon = {
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Icon(
+                                imageVector = if (confirmPasswordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff,
+                                contentDescription = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
+                    isError = confirmarContrasenaError,
+                    supportingText = {
+                        if (confirmarContrasenaError) {
+                            Text(
+                                text = "Las contraseñas no coinciden",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else if (confirmarContrasena.text.isNotEmpty() && passwordsMatch) {
+                            Text(
+                                text = "Las contraseñas coinciden",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
+                            if (passwordsMatch) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.outline,
+                        unfocusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
+                            if (passwordsMatch) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.outline
+                    )
                 )
-            )
                 OutlinedTextField(
                     value = fechaNacimiento,
                     onValueChange = { fechaNacimiento = it },
