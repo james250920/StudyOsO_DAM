@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import com.menfroyt.studyoso.utils.hashPassword
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.text.style.TextAlign
 import java.text.SimpleDateFormat
@@ -42,9 +44,8 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(
-    navController: NavController
-) {
+fun RegisterScreen(navController: NavController) {
+    // Estados y variables (mantener los existentes)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) }
@@ -53,26 +54,28 @@ fun RegisterScreen(
         factory = UsuarioViewModelFactory(usuarioRepository)
     )
     val sessionManager = remember { SessionManager(context) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    // Estados de los campos
     var nombre by remember { mutableStateOf(TextFieldValue("")) }
     var apellido by remember { mutableStateOf(TextFieldValue("")) }
     var correo by remember { mutableStateOf(TextFieldValue("")) }
-
     var contrasena by remember { mutableStateOf(TextFieldValue("")) }
     var confirmarContrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var fechaNacimiento by remember { mutableStateOf(TextFieldValue("")) }
+
+    // Estados de UI
     var passwordsMatch by remember { mutableStateOf(true) }
     var confirmarContrasenaError by remember { mutableStateOf(false) }
-
-    var fechaNacimiento by remember { mutableStateOf(TextFieldValue("")) }
-    val snackbarHostState = remember { SnackbarHostState() }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
-
     var isLoading by remember { mutableStateOf(false) }
     var showSuccessDialog by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    // DatePicker
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
         selectableDates = object : SelectableDates {
@@ -82,12 +85,224 @@ fun RegisterScreen(
         }
     )
 
+    // Efectos
     LaunchedEffect(showError) {
         if (showError) {
             snackbarHostState.showSnackbar(errorMessage)
             showError = false
         }
     }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Fondo
+            Image(
+                painter = painterResource(id = R.drawable.background),
+                contentDescription = "Fondo de registro",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // Contenido principal
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Spacer(modifier = Modifier.height(2.dp))
+
+                // Logo
+                Image(
+                    painter = painterResource(id = R.drawable.study),
+                    contentDescription = "Study OSO Logo",
+                    modifier = Modifier
+                        .size(120.dp)
+                        .padding(bottom = 4.dp),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Título
+                Text(
+                    text = "Crear una cuenta",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                // Campos del formulario
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = apellido,
+                    onValueChange = { apellido = it },
+                    label = { Text("Apellido") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = correo,
+                    onValueChange = { correo = it },
+                    label = { Text("Correo Electrónico") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = contrasena,
+                    onValueChange = { contrasena = it },
+                    label = { Text("Contraseña") },
+                    visualTransformation = if (passwordVisible)
+                        VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible)
+                                    Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (passwordVisible)
+                                    "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = confirmarContrasena,
+                    onValueChange = {
+                        confirmarContrasena = it
+                        passwordsMatch = contrasena.text == it.text
+                        confirmarContrasenaError = it.text.isNotEmpty() && !passwordsMatch
+                    },
+                    label = { Text("Confirmar Contraseña") },
+                    visualTransformation = if (confirmPasswordVisible)
+                        VisualTransformation.None else PasswordVisualTransformation(),
+                    isError = confirmarContrasenaError,
+                    supportingText = {
+                        if (confirmarContrasenaError) {
+                            Text(
+                                text = "Las contraseñas no coinciden",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else if (confirmarContrasena.text.isNotEmpty() && passwordsMatch) {
+                            Text(
+                                text = "Las contraseñas coinciden",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Icon(
+                                imageVector = if (confirmPasswordVisible)
+                                    Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (confirmPasswordVisible)
+                                    "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = fechaNacimiento,
+                    onValueChange = { fechaNacimiento = it },
+                    label = { Text("Fecha de Nacimiento") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Seleccionar fecha"
+                            )
+                        }
+                    },
+                    singleLine = true
+                )
+
+                // Términos y condiciones
+                Text(
+                    text = "Al hacer clic en Registrarte, aceptas las Condiciones, la Política de privacidad y la Política de cookies.",
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center
+                )
+
+                // Botones
+                Button(
+                    onClick = {
+                        if (nombre.text.isBlank() || apellido.text.isBlank() ||
+                            correo.text.isBlank() || contrasena.text.isBlank() ||
+                            fechaNacimiento.text.isBlank()
+                        ) {
+                            errorMessage = "Complete todos los campos"
+                            showError = true
+                            return@Button
+                        }
+
+                        if (contrasena.text != confirmarContrasena.text) {
+                            errorMessage = "Las contraseñas no coinciden"
+                            showError = true
+                            return@Button
+                        }
+
+                        isLoading = true
+                        val hashedPassword = hashPassword(contrasena.text.trim())
+                        val usuario = Usuario(
+                            nombre = nombre.text.trim(),
+                            apellido = apellido.text.trim(),
+                            correo = correo.text.trim(),
+                            contrasena = hashedPassword,
+                            fechaNacimiento = fechaNacimiento.text.trim()
+                        )
+
+                        scope.launch {
+                            try {
+                                usuarioViewModel.agregarUsuario(usuario)
+                                delay(1500)
+                                isLoading = false
+                                showSuccessDialog = true
+                            } catch (e: Exception) {
+                                isLoading = false
+                                showError = true
+                                errorMessage = "Error al registrar: ${e.message}"
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Registrarse")
+                }
+
+                TextButton(
+                    onClick = { navController.navigate("login") }
+                ) {
+                    Text("¿Tienes cuenta? Iniciar Sesión")
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+    }
+
+    // Diálogos y overlays
     if (isLoading) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -131,8 +346,7 @@ fun RegisterScreen(
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        color = MaterialTheme.colorScheme.primary
+                            .padding(top = 16.dp)
                     )
                 }
             },
@@ -144,7 +358,10 @@ fun RegisterScreen(
                             correo.text.trim(),
                             contrasena.text.trim(),
                             onSuccess = { usuarioAutenticado ->
-                                sessionManager.saveSession(usuarioAutenticado.idUsuario, correo.text.trim())
+                                sessionManager.saveSession(
+                                    usuarioAutenticado.idUsuario,
+                                    correo.text.trim()
+                                )
                                 navController.navigate("home/${usuarioAutenticado.idUsuario}") {
                                     popUpTo("register") { inclusive = true }
                                 }
@@ -159,9 +376,7 @@ fun RegisterScreen(
                 ) {
                     Text("Continuar")
                 }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.padding(16.dp)
+            }
         )
     }
 
@@ -170,9 +385,8 @@ fun RegisterScreen(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val date = Date(millis + 86400000) // Sumar un día en milisegundos para corregir la fecha
+                        val date = Date(millis + 86400000)
                         fechaNacimiento = TextFieldValue(date.toString())
                     }
                     showDatePicker = false
@@ -189,230 +403,4 @@ fun RegisterScreen(
             DatePicker(state = datePickerState)
         }
     }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { padding ->
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            // Imagen de fondo
-            Image(
-                painter = painterResource(id = R.drawable.background), // Usar la imagen c1.png
-                contentDescription = "Fondo de registro",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop // Ajustar para que cubra toda la pantalla
-            )
-
-            // Contenido de la pantalla
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center, // Centrar verticalmente
-                horizontalAlignment = Alignment.CenterHorizontally // Centrar horizontalmente
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.study),
-                    contentDescription = "Study OSO Logo",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .padding(bottom = 16.dp), // Espacio debajo del logo
-                    contentScale = ContentScale.Fit
-                )
-
-                //texto Crear una cuenta
-                Text(
-                    text = "Crear una cuenta",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 16.dp) // Espacio debajo del título
-                )
-
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp) // Espacio debajo del campo
-                        .padding(horizontal = 16.dp)
-                )
-
-                OutlinedTextField(
-                    value = apellido,
-                    onValueChange = { apellido = it },
-                    label = { Text("Apellido") },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(bottom = 8.dp) // Espacio debajo del campo
-                        .padding(horizontal = 16.dp)
-                )
-
-
-                OutlinedTextField(
-                    value = correo,
-                    onValueChange = { correo = it },
-                    label = { Text("Correo Electrónico") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(bottom = 8.dp) // Espacio debajo del campo
-                        .padding(horizontal = 16.dp)
-                )
-
-
-                OutlinedTextField(
-                    value = contrasena,
-                    onValueChange = { contrasena = it },
-                    label = { Text("Contraseña") },
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible)
-                                    Icons.Filled.Visibility
-                                else Icons.Filled.VisibilityOff,
-                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .padding(horizontal = 16.dp)
-                )
-
-                OutlinedTextField(
-                    value = confirmarContrasena,
-                    onValueChange = {
-                        confirmarContrasena = it
-                        passwordsMatch = contrasena.text == it.text
-                        confirmarContrasenaError = it.text.isNotEmpty() && !passwordsMatch
-                    },
-                    label = { Text("Confirmar Contraseña") },
-                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .padding(horizontal = 16.dp),
-                    trailingIcon = {
-                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                            Icon(
-                                imageVector = if (confirmPasswordVisible)
-                                    Icons.Filled.Visibility
-                                else Icons.Filled.VisibilityOff,
-                                contentDescription = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-                            )
-                        }
-                    },
-                    isError = confirmarContrasenaError,
-                    supportingText = {
-                        if (confirmarContrasenaError) {
-                            Text(
-                                text = "Las contraseñas no coinciden",
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        } else if (confirmarContrasena.text.isNotEmpty() && passwordsMatch) {
-                            Text(
-                                text = "Las contraseñas coinciden",
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
-                            if (passwordsMatch) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.outline,
-                        unfocusedBorderColor = if (confirmarContrasena.text.isNotEmpty())
-                            if (passwordsMatch) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.outline
-                    )
-                )
-                OutlinedTextField(
-                    value = fechaNacimiento,
-                    onValueChange = { fechaNacimiento = it },
-                    label = { Text("Fecha de Nacimiento") },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(bottom = 16.dp) // Espacio debajo del campo
-                        .padding(horizontal = 16.dp),
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { showDatePicker = true }) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Seleccionar fecha"
-                            )
-                        }
-                    }
-                )
-
-                //Agregar texto de terminos y condiciones.
-                Text(
-                    text = "Al hacer clic en Registrarte, aceptas las Condiciones, la Política de privacidad y la Política de cookies.",
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp) // Espacio debajo del texto
-                )
-            Button(
-                onClick = {
-                    if (nombre.text.isBlank() || apellido.text.isBlank() ||
-                        correo.text.isBlank() || contrasena.text.isBlank() ||
-                        fechaNacimiento.text.isBlank() || confirmarContrasena.text.isBlank()
-                    ) {
-                        errorMessage = "Complete todos los campos"
-                        showError = true
-                        return@Button
-                    }
-
-                    if (contrasena.text != confirmarContrasena.text) {
-                        errorMessage = "Las contraseñas no coinciden"
-                        showError = true
-                        return@Button
-                    }
-
-                    isLoading = true
-                    val hashedPassword = hashPassword(contrasena.text.trim())
-                    val usuario = Usuario(
-                        nombre = nombre.text.trim(),
-                        apellido = apellido.text.trim(),
-                        correo = correo.text.trim(),
-                        contrasena = hashedPassword,
-                        fechaNacimiento = fechaNacimiento.text.trim()
-                    )
-
-                    scope.launch {
-                        try {
-                            usuarioViewModel.agregarUsuario(usuario)
-                            delay(1500) // Simular carga
-                            isLoading = false
-                            showSuccessDialog = true
-                        } catch (e: Exception) {
-                            isLoading = false
-                            showError = true
-                            errorMessage = "Error al registrar: ${e.message}"
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Registrarse")
-            }
-                TextButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally), // Centrar el botón de texto
-                    onClick = { navController.navigate("login") }
-                ) {
-                    Text("¿Tienes cuenta? Iniciar Sesión")
-                }
-            }
-        }
-    }
 }
-
-
-
-
