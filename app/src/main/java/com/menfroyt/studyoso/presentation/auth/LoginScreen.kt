@@ -3,17 +3,28 @@ package com.menfroyt.studyoso.presentation.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -21,6 +32,7 @@ import com.menfroyt.studyoso.R
 import com.menfroyt.studyoso.ViewModel.usuario.*
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.repositories.UsuarioRepository
+import com.menfroyt.studyoso.presentation.auth.SessionManager
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +52,7 @@ fun LoginScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(false) }
     var correo by remember { mutableStateOf(TextFieldValue("")) }
     var contrasena by remember { mutableStateOf(TextFieldValue("")) }
+    var passwordVisible by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
@@ -67,48 +80,112 @@ fun LoginScreen(navController: NavController) {
             // Fondo
             BackgroundImage()
 
-            // Contenido principal
+            // Contenido principal con scroll
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(16.dp),
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LogoImage()
-                LoginForm(
-                    correo = correo,
-                    contrasena = contrasena,
-                    isLoading = isLoading,
-                    onCorreoChange = { correo = it },
-                    onContrasenaChange = { contrasena = it }
-                )
-                LoginButton(
-                    isLoading = isLoading,
-                    onLogin = {
-                        handleLogin(
-                            correo = correo.text,
-                            contrasena = contrasena.text,
-                            scope = scope,
-                            usuarioViewModel = usuarioViewModel,
-                            sessionManager = sessionManager,
-                            navController = navController,
-                            onError = { mensaje ->
-                                errorMessage = mensaje
-                                showError = true
-                            },
-                            setLoading = { isLoading = it }
+                // Card principal de login
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        // Header con logo y título
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            LogoImage()
+                            
+                            Text(
+                                text = "¡Bienvenido de nuevo!",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            Text(
+                                text = "Inicia sesión para continuar con tus estudios",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        // Formulario de login
+                        LoginForm(
+                            correo = correo,
+                            contrasena = contrasena,
+                            passwordVisible = passwordVisible,
+                            isLoading = isLoading,
+                            onCorreoChange = { correo = it },
+                            onContrasenaChange = { contrasena = it },
+                            onPasswordVisibilityChange = { passwordVisible = it }
+                        )
+
+                        // Botón de login
+                        LoginButton(
+                            isLoading = isLoading,
+                            enabled = correo.text.isNotBlank() && contrasena.text.isNotBlank(),
+                            onLogin = {
+                                handleLogin(
+                                    correo = correo.text,
+                                    contrasena = contrasena.text,
+                                    scope = scope,
+                                    usuarioViewModel = usuarioViewModel,
+                                    sessionManager = sessionManager,
+                                    navController = navController,
+                                    onError = { mensaje ->
+                                        errorMessage = mensaje
+                                        showError = true
+                                    },
+                                    setLoading = { isLoading = it }
+                                )
+                            }
+                        )
+
+                        // Divider con texto
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HorizontalDivider(modifier = Modifier.weight(1f))
+                            Text(
+                                text = "  o  ",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                            HorizontalDivider(modifier = Modifier.weight(1f))
+                        }
+
+                        // Botón de registro
+                        RegisterButton(
+                            isLoading = isLoading,
+                            navController = navController
                         )
                     }
-                )
-                RegisterButton(
-                    isLoading = isLoading,
-                    navController = navController
-                )
+                }
             }
 
-            // Indicador de carga
+            // Overlay de carga mejorado
             if (isLoading) {
                 LoadingIndicator()
             }
@@ -128,78 +205,164 @@ private fun BackgroundImage() {
 
 @Composable
 private fun LogoImage() {
-    Image(
-        painter = painterResource(id = R.drawable.study),
-        contentDescription = "Study OSO Logo",
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp),
-        contentScale = ContentScale.Fit
-    )
+            .size(100.dp)
+            .background(
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.study),
+            contentDescription = "Study OSO Logo",
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Fit
+        )
+    }
 }
 
 @Composable
 private fun LoginForm(
     correo: TextFieldValue,
     contrasena: TextFieldValue,
+    passwordVisible: Boolean,
     isLoading: Boolean,
     onCorreoChange: (TextFieldValue) -> Unit,
-    onContrasenaChange: (TextFieldValue) -> Unit
+    onContrasenaChange: (TextFieldValue) -> Unit,
+    onPasswordVisibilityChange: (Boolean) -> Unit
 ) {
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    OutlinedTextField(
-        value = correo,
-        onValueChange = onCorreoChange,
-        label = { Text("Correo Electrónico") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp),
-        enabled = !isLoading
-    )
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    OutlinedTextField(
-        value = contrasena,
-        onValueChange = onContrasenaChange,
-        label = { Text("Contraseña") },
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        trailingIcon = {
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Campo de correo mejorado
+        OutlinedTextField(
+            value = correo,
+            onValueChange = onCorreoChange,
+            label = { Text("Correo Electrónico") },
+            leadingIcon = {
                 Icon(
-                    imageVector = if (passwordVisible)
-                        Icons.Filled.Visibility
-                    else Icons.Filled.VisibilityOff,
-                    contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                    imageVector = Icons.Default.Email,
+                    contentDescription = "Email",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                focusedLeadingIconColor = MaterialTheme.colorScheme.primary
+            ),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        // Campo de contraseña mejorado
+        OutlinedTextField(
+            value = contrasena,
+            onValueChange = onContrasenaChange,
+            label = { Text("Contraseña") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Password",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            trailingIcon = {
+                IconButton(onClick = { onPasswordVisibilityChange(!passwordVisible) }) {
+                    Icon(
+                        imageVector = if (passwordVisible)
+                            Icons.Filled.Visibility
+                        else Icons.Filled.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                focusedLeadingIconColor = MaterialTheme.colorScheme.primary
+            ),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        // Enlace de "¿Olvidaste tu contraseña?"
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                onClick = { 
+                    // TODO: Implementar funcionalidad de recuperar contraseña
+                },
+                enabled = !isLoading
+            ) {
+                Text(
+                    text = "¿Olvidaste tu contraseña?",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp),
-        enabled = !isLoading
-    )
-
-
+        }
+    }
 }
 
 @Composable
 private fun LoginButton(
     isLoading: Boolean,
+    enabled: Boolean,
     onLogin: () -> Unit
 ) {
-    Spacer(modifier = Modifier.height(16.dp))
     Button(
         onClick = onLogin,
         modifier = Modifier
-            .fillMaxWidth(0.6f)
-            .height(50.dp),
-        enabled = !isLoading
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = enabled && !isLoading,
+        shape = RoundedCornerShape(16.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
     ) {
-        Text("Iniciar Sesión")
+        if (isLoading) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "Iniciando sesión...",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        } else {
+            Text(
+                text = "Iniciar Sesión",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 
@@ -208,24 +371,66 @@ private fun RegisterButton(
     isLoading: Boolean,
     navController: NavController
 ) {
-    Spacer(modifier = Modifier.height(8.dp))
-    TextButton(
+    OutlinedButton(
         onClick = { navController.navigate("register") },
-        enabled = !isLoading
+        enabled = !isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(
+            1.5.dp, 
+            MaterialTheme.colorScheme.primary
+        ),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.primary
+        )
     ) {
-        Text("¿No tienes cuenta? Regístrate")
+        Text(
+            text = "¿No tienes cuenta? Crear una nueva",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
 @Composable
 private fun LoadingIndicator() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary
-        )
+        Card(
+            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(20.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp),
+                    strokeWidth = 4.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Iniciando sesión...",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Por favor espera",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        }
     }
 }
 
@@ -239,27 +444,43 @@ private fun handleLogin(
     onError: (String) -> Unit,
     setLoading: (Boolean) -> Unit
 ) {
-    if (correo.isBlank() || contrasena.isBlank()) {
-        onError("Ingrese correo y contraseña")
-        return
+    // Validaciones mejoradas
+    when {
+        correo.isBlank() -> {
+            onError("Por favor ingresa tu correo electrónico")
+            return
+        }
+        contrasena.isBlank() -> {
+            onError("Por favor ingresa tu contraseña")
+            return
+        }
+        !android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches() -> {
+            onError("Por favor ingresa un correo electrónico válido")
+            return
+        }
     }
 
     scope.launch {
         setLoading(true)
-        usuarioViewModel.login(
-            correo.trim(),
-            contrasena.trim(),
-            onSuccess = { usuario ->
-                sessionManager.saveSession(usuario.idUsuario, correo.trim())
-                setLoading(false)
-                navController.navigate("home/${usuario.idUsuario}") {
-                    popUpTo("login") { inclusive = true }
+        try {
+            usuarioViewModel.login(
+                correo.trim(),
+                contrasena.trim(),
+                onSuccess = { usuario ->
+                    sessionManager.saveSession(usuario.idUsuario, correo.trim())
+                    setLoading(false)
+                    navController.navigate("home/${usuario.idUsuario}") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onError = { mensaje ->
+                    setLoading(false)
+                    onError(mensaje)
                 }
-            },
-            onError = { mensaje ->
-                setLoading(false)
-                onError(mensaje)
-            }
-        )
+            )
+        } catch (e: Exception) {
+            setLoading(false)
+            onError("Error inesperado: ${e.message}")
+        }
     }
 }
