@@ -67,5 +67,12 @@ class CursoViewModel(private val repository: CursoRepository) : ViewModel() {
     fun seleccionarCurso(curso: Curso) {
         _cursoSeleccionado.value = curso
     }
+
+    //total de creditos por usuario
+    fun getTotalCreditosByUsuario(usuarioId: Int): Int? {
+        return repository.getTotalCreditosByUsuario(usuarioId)
+    }
+
+
 }
 

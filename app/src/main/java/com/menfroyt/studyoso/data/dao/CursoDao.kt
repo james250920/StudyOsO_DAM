@@ -27,4 +27,8 @@ interface CursoDao {
     @Query("SELECT * FROM Cursos")
     fun getCursos(): Flow<List<Curso>>
 
+    //total de creditos
+    @Query("SELECT SUM(creditos) FROM Cursos WHERE id_usuario = :userId")
+    fun getTotalCreditosByUsuario(userId: Int): Int?
+
 }

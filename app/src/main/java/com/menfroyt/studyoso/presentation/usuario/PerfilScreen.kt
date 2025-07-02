@@ -2,7 +2,6 @@ package com.menfroyt.studyoso.presentation.usuario
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,7 +29,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,48 +70,137 @@ fun PerfilScreen(
     var usuario by remember { mutableStateOf<Usuario?>(null) }
     var curso by remember { mutableStateOf<List<Curso>>(emptyList()) }
     var calificacion by remember { mutableStateOf<List<Calificacion>>(emptyList()) }
+    var creditoscurso by remember { mutableStateOf<Int?>(null) }
 
     var loading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // Cargar datos iniciales
     LaunchedEffect(usuarioId) {
-        usuarioViewModel.getUsuarioAutenticado(
-            id = usuarioId,
-            onSuccess = {
-                usuario = it
-                loading = false
-            },
-            onError = {
-                errorMessage = it
-                loading = false
+        try {
+            // Cargar usuario
+            usuarioViewModel.getUsuarioAutenticado(
+                id = usuarioId,
+                onSuccess = { usuario = it },
+                onError = { errorMessage = it }
+            )
+
+            // Cargar cursos
+            cursoViewModel.cargarCursos(usuarioId)
+
+            // Cargar calificaciones
+            calificacionViewModel.cargarCalificacionesPorUsuario(usuarioId)
+
+            // Obtener créditos de forma asíncrona
+            try {
+                creditoscurso = cursoViewModel.getTotalCreditosByUsuario(usuarioId)
+            } catch (e: Exception) {
+                creditoscurso = 0
             }
-        )
+
+        } catch (e: Exception) {
+
+        } finally {
+            loading = false
+        }
     }
 
-    if (loading) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    // Observar cambios en cursos
+    LaunchedEffect(Unit) {
+        cursoViewModel.cursos.collect { cursos ->
+            curso = cursos
         }
-    } else if (usuario == null) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = errorMessage ?: "Usuario no encontrado")
+    }
+
+    // Observar cambios en calificaciones
+    LaunchedEffect(Unit) {
+        calificacionViewModel.calificaciones.collect { calificaciones ->
+            calificacion = calificaciones
         }
-    } else {
-        usuario?.let { usuarioNoNulo ->
-            PerfilContent(
-                usuario = usuarioNoNulo,
-                modifier = modifier,
-                onScreenSelected = onScreenSelected
-            )
+    }
+
+    // UI
+    when {
+        loading -> {
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Cargando perfil...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+
+        usuario == null -> {
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Error,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = errorMessage ?: "Usuario no encontrado",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            loading = true
+                            errorMessage = null
+                        }
+                    ) {
+                        Text("Reintentar")
+                    }
+                }
+            }
+        }
+
+        else -> {
+            usuario?.let { usuarioNoNulo ->
+                PerfilContent(
+                    cursos = curso,
+                    calificaciones = calificacion,
+                    usuario = usuarioNoNulo,
+                    modifier = modifier,
+                    onScreenSelected = onScreenSelected
+                )
+            }
         }
     }
 }
+
 @Composable
 private fun PerfilContent(
+    cursos: List<Curso>,
+    calificaciones: List<Calificacion>,
     usuario: Usuario,
     modifier: Modifier = Modifier,
     onScreenSelected: (String) -> Unit
 ) {
+    val totalCreditos = remember(cursos) {
+        cursos.sumOf { it.creditos ?: 0 }
+    }
+
+    val promedioGeneral = if (calificaciones.isNotEmpty()) {
+        calificaciones.mapNotNull { it.calificacionObtenida }.average()
+    } else 0.0
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     val density = LocalDensity.current
@@ -212,9 +298,9 @@ private fun PerfilContent(
                     title = "Estadísticas Académicas",
                     icon = Icons.Filled.Analytics,
                     items = listOf(
-                        InfoItem("Cursos Activos", "7", Icons.Outlined.School),
-                        InfoItem("Número de Créditos", "24", Icons.Outlined.Star),
-                        InfoItem("Promedio General", "18.5", Icons.Outlined.TrendingUp)
+                        InfoItem("Cursos Activos", "${cursos.size}", Icons.Outlined.School),
+                        InfoItem("Número de Créditos", "$totalCreditos", Icons.Outlined.Star),
+                        InfoItem("Promedio General", String.format("%.1f", promedioGeneral), Icons.Outlined.TrendingUp)
                     ),
                     isLandscape = isLandscape,
                     colorScheme = "success"
@@ -240,8 +326,8 @@ private fun PerfilContent(
                         when (action) {
                             "editar" -> showEditDialog = true
                             "configuracion" -> onScreenSelected("configuracion")
-                            "calificaciones" -> onScreenSelected("calificaciones")
-                            "cursos" -> onScreenSelected("cursos")
+                            "calificaciones" -> onScreenSelected("ListCalificaciones")
+                            "cursos" -> onScreenSelected("lisCurso")
                         }
                     },
                     isLandscape = isLandscape

@@ -81,7 +81,6 @@ fun Home(
                             when (option) {
                                 "Perfil" -> selectedScreen = "Perfil"
                                 "Dashboard" -> selectedScreen = "Dashboard"
-                                "Configuración" -> selectedScreen = "Configuración"
                                 "Pomodoro" -> selectedScreen = "Pomodoro"
                                 "Cerrar Sesión" -> navController.navigate("login") { popUpTo(0) }
                             }

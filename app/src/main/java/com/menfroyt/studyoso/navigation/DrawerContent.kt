@@ -41,6 +41,12 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         DrawerOption(
+            text = "Guia",
+            icon = Icons.Filled.AccountCircle,
+            selectedScreen = selectedScreen,
+            onClick = { onOptionSelected("Perfil") }
+        )
+        DrawerOption(
             text = "Perfil",
             icon = Icons.Filled.AccountCircle,
             selectedScreen = selectedScreen,

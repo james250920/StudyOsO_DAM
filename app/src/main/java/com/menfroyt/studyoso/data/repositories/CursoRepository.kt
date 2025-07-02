@@ -18,4 +18,7 @@ class CursoRepository(private val dao: CursoDao) {
     fun getCursos(): Flow<List<Curso>> {
         return dao.getCursos()
     }
+    fun getTotalCreditosByUsuario(userId: Int): Int? {
+        return dao.getTotalCreditosByUsuario(userId)
+    }
 }
