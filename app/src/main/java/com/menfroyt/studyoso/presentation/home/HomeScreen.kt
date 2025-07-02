@@ -79,8 +79,10 @@ fun Home(
                         selectedScreen = selectedScreen,
                         onOptionSelected = { option ->
                             when (option) {
+                                "Home" -> selectedScreen = "Principal"
                                 "Perfil" -> selectedScreen = "Perfil"
                                 "Dashboard" -> selectedScreen = "Dashboard"
+                                "Calendario" -> selectedScreen = "Calendario"
                                 "Pomodoro" -> selectedScreen = "Pomodoro"
                                 "Cerrar Sesión" -> navController.navigate("login") { popUpTo(0) }
                             }

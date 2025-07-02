@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Output
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
@@ -60,6 +61,12 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
             onClick = { onOptionSelected("Dashboard") }
         )
         DrawerOption(
+            text = "Calendario",
+            icon = Icons.Filled.CalendarMonth,
+            selectedScreen = selectedScreen,
+            onClick = { onOptionSelected("Calendario") }
+        )
+        DrawerOption(
             text = "Pomodoro",
             icon = Icons.Filled.Timer,
             selectedScreen = selectedScreen,
@@ -105,6 +112,7 @@ fun DrawerOption(
             tint = when (text) {
                 "Home" -> if (selectedScreen == "Principal") Color(0xFF33c1ff) else Color(0xFF3355ff)
                 "Dashboard" -> if (selectedScreen == "Dashboard") Color(0xFF33c1ff) else Color(0xFF3355ff)
+                "Calendario" -> if (selectedScreen == "Calendario") Color(0xFF33c1ff) else Color(0xFF3355ff)
                 "Perfil" -> if (selectedScreen == "Perfil") Color(0xFF33c1ff) else Color(0xFF3355ff)
                 "Configuración" -> if (selectedScreen == "Configuración") Color(0xFF33c1ff) else Color(0xFF3355ff)
                 "Pomodoro" -> if (selectedScreen == "Pomodoro") Color(0xFF33c1ff) else Color(0xFF3355ff)
@@ -120,6 +128,7 @@ fun DrawerOption(
             color = when (text) {
                 "Home" -> if (selectedScreen == "Principal") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
                 "Dashboard" -> if (selectedScreen == "Dashboard") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
+                "Calendario" -> if (selectedScreen == "Calendario") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
                 "Perfil" -> if (selectedScreen == "Perfil") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
                 "Configuración" -> if (selectedScreen == "Configuración") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
                 "Pomodoro" -> if (selectedScreen == "Pomodoro") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface

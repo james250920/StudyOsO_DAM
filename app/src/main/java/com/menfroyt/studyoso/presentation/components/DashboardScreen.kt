@@ -108,28 +108,12 @@ fun DashboardScreen(
         )
 
     }
-
-    // Gradiente de fondo
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-            MaterialTheme.colorScheme.surface,
-            MaterialTheme.colorScheme.surface
-        )
-    )
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(backgroundGradient)
-    ) {
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .padding(
-                    horizontal = if (isLandscape) 32.dp else 20.dp,
-                    vertical = 16.dp
-                ),
+                .padding(start = 16.dp, end = 16.dp)
+            ,
+
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Header animado
@@ -234,9 +218,31 @@ fun DashboardScreen(
                         isLandscape = isLandscape
                     )
                 }
+
+            }
+
+        }
+      Spacer( modifier = Modifier.height(16.dp)) // Espacio al final de la lista
+        if (loading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (errorMessage != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Error: $errorMessage",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
-    }
+
 }
 
 @Composable
@@ -246,7 +252,9 @@ private fun DashboardHeader(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxSize()
+        .padding(vertical = 16.dp)
+        ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Saludo personalizado
@@ -255,6 +263,7 @@ private fun DashboardHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Column {
                 Text(
                     text = "¡Hola! ${usuario}",
@@ -937,6 +946,7 @@ private fun QuickActionsDashboard(
             }
         }
     }
+
 }
 
 @Composable
