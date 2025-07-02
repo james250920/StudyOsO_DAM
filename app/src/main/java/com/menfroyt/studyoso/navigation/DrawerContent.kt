@@ -53,13 +53,6 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
             selectedScreen = selectedScreen,
             onClick = { onOptionSelected("Dashboard") }
         )
-
-        DrawerOption(
-            text = "Configuración",
-            icon = Icons.Filled.Settings,
-            selectedScreen = selectedScreen,
-            onClick = { onOptionSelected("Configuración") }
-        )
         DrawerOption(
             text = "Pomodoro",
             icon = Icons.Filled.Timer,

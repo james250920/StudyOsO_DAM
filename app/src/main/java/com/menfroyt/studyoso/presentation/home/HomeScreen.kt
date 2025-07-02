@@ -27,7 +27,6 @@ import com.menfroyt.studyoso.presentation.calificacion.DetalleCalificacionesScre
 import com.menfroyt.studyoso.presentation.calificacion.ListCalificacionScreen
 import com.menfroyt.studyoso.presentation.calificacion.SimuladorCalificacionesScreen
 import com.menfroyt.studyoso.presentation.components.DashboardScreen
-import com.menfroyt.studyoso.presentation.config.ConfiguracionScreen
 import com.menfroyt.studyoso.presentation.curso.AgregarCursosScreen
 import com.menfroyt.studyoso.presentation.curso.DetalleCursoScreen
 import com.menfroyt.studyoso.presentation.curso.ListCursoScreen
@@ -283,9 +282,6 @@ fun Home(
 
                     selectedScreen == "Calendario" -> CalendarioScreen(
                         modifier = Modifier.padding(innerPadding),
-                    )
-                    selectedScreen == "Configuración" -> ConfiguracionScreen(
-                        modifier = Modifier.padding(innerPadding)
                     )
                     selectedScreen == "Dashboard" -> DashboardScreen(
                         modifier = Modifier.padding(innerPadding),

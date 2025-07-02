@@ -18,10 +18,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModel
+import com.menfroyt.studyoso.ViewModel.calificacion.CalificacionViewModelFactory
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
+import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
 import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModel
 import com.menfroyt.studyoso.ViewModel.usuario.UsuarioViewModelFactory
 import com.menfroyt.studyoso.data.db.AppDatabase
+import com.menfroyt.studyoso.data.entities.Calificacion
+import com.menfroyt.studyoso.data.entities.Curso
 import com.menfroyt.studyoso.data.entities.Usuario
+import com.menfroyt.studyoso.data.repositories.CalificacionRepository
+import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.UsuarioRepository
 
 
@@ -33,12 +41,22 @@ fun PerfilScreen(
 ) {
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) }
+
+    val calificacionRepository = remember { CalificacionRepository(db.CalificacionDao()) }
+    val calificacionViewModel: CalificacionViewModel = viewModel(factory = CalificacionViewModelFactory(calificacionRepository))
+
+    val cursoRepository = remember { CursoRepository(db.CursoDao()) }
+    val cursoViewModel: CursoViewModel = viewModel(factory = CursoViewModelFactory(cursoRepository))
+
     val usuarioRepository = remember { UsuarioRepository(db.UsuarioDao()) }
     val usuarioViewModel: UsuarioViewModel = viewModel(
         factory = UsuarioViewModelFactory(usuarioRepository)
     )
 
     var usuario by remember { mutableStateOf<Usuario?>(null) }
+    var curso by remember { mutableStateOf<List<Curso>>(emptyList()) }
+    var calificacion by remember { mutableStateOf<List<Calificacion>>(emptyList()) }
+
     var loading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -137,28 +155,6 @@ private fun PerfilContent(
             ),
             iconTint = Color(0xFF00897B)  // Verde azulado
         )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = { onScreenSelected("EditarPerfil") },
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3355ff),  // Azul principal
-                contentColor = Color.White
-            ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("Editar Perfil")
-        }
     }
 }
 
