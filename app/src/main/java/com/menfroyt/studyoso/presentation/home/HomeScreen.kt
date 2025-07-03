@@ -49,6 +49,7 @@ import com.menfroyt.studyoso.presentation.tarea.AddTaskScreen
 import com.menfroyt.studyoso.presentation.tarea.ListTaskScreen
 import com.menfroyt.studyoso.presentation.usuario.PerfilScreen
 import com.menfroyt.studyoso.presentation.components.CalendarioScreen
+import com.menfroyt.studyoso.presentation.components.GuiaScreen
 import com.menfroyt.studyoso.presentation.components.MatrizEisenhowerScreen
 import com.menfroyt.studyoso.presentation.components.pomodoro.PomodoroScreen
 
@@ -132,6 +133,7 @@ fun Home(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             when (option) {
                                 "Home" -> selectedScreen = "Principal"
+                                "Guia" -> selectedScreen = "Guia"
                                 "Perfil" -> selectedScreen = "Perfil"
                                 "Dashboard" -> selectedScreen = "Dashboard"
                                 "Calendario" -> selectedScreen = "Calendario"
@@ -541,6 +543,10 @@ fun Home(
                             onScreenSelected = { screen -> selectedScreen = screen },
                             usuarioId = usuarioId
                         )
+                        selectedScreen == "Guia" -> GuiaScreen(
+                            modifier = Modifier.padding(innerPadding),
+                        )
+
                     }
                 }
             }

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Output
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SignLanguage
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -43,9 +44,9 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
         )
         DrawerOption(
             text = "Guia",
-            icon = Icons.Filled.AccountCircle,
+            icon = Icons.Filled.SignLanguage,
             selectedScreen = selectedScreen,
-            onClick = { onOptionSelected("Perfil") }
+            onClick = { onOptionSelected("Guia") }
         )
         DrawerOption(
             text = "Perfil",

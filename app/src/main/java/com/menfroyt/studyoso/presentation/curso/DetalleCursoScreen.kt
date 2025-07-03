@@ -2,12 +2,24 @@ package com.menfroyt.studyoso.presentation.curso
 
 import android.annotation.SuppressLint
 import android.graphics.Color.parseColor
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -16,12 +28,24 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,6 +84,7 @@ data class PruebaDialogState(
     fun isValid() = tipo.isNotBlank() && numero.isNotBlank() && peso.isNotBlank()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleCursoScreen(
     modifier: Modifier = Modifier,
@@ -67,6 +92,7 @@ fun DetalleCursoScreen(
     cursoId: Int
 ) {
     val context = LocalContext.current
+    val hapticFeedback = LocalHapticFeedback.current
     val db = remember { AppDatabase.getInstance(context) }
     val cursoRepository = remember { CursoRepository(db.CursoDao()) }
     val cursoViewModel: CursoViewModel = viewModel(
@@ -81,85 +107,141 @@ fun DetalleCursoScreen(
     val tipoPruebaViewModel: TipoPruebaViewModel = viewModel(factory = TipoPruebaViewModelFactory(tipoPruebaRepository))
     val tiposPrueba by tipoPruebaViewModel.tiposPrueba.collectAsState()
 
-    // Estado para el curso cargado
+    // Estados para animaciones
+    var isVisible by remember { mutableStateOf(false) }
     var curso by remember { mutableStateOf<Curso?>(null) }
     val scrollState = rememberScrollState()
+
+    // Animaciones de entrada
+    val headerScale by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0.95f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
 
     // Cargar curso cuando cambie cursoId
     LaunchedEffect(cursoId) {
         curso = cursoViewModel.getCursoById(cursoId)
         horarioViewModel.cargarHorarios(cursoId)
         tipoPruebaViewModel.cargarTiposPorCurso(cursoId)
+        isVisible = true
     }
 
     curso?.let { cursoActual ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .verticalScroll(scrollState)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(500)
+            ) + fadeIn(tween(500)),
+            exit = slideOutVertically() + fadeOut()
         ) {
-            CursoHeader(
-                modifier = Modifier.fillMaxWidth(),
-                onScreenSelected = onScreenSelected,
-                cursoNombre = cursoActual.nombreCurso,
-                cursoColor = cursoActual.color ?: "#FFFFFF"
-            )
-            CursoInfo(
-                profesor = cursoActual.profesor ?: "N/A",
-                aula = cursoActual.aula ?: "N/A"
-            )
-            HorarioSection(
-                horarios = horarios,
-                onAgregarHorario = { horarioState ->
-                    val nuevoHorario = Horario(
-                        idCurso = cursoId,
-                        diaSemana = horarioState.dia,
-                        horaInicio = horarioState.horaInicio,
-                        horaFin = horarioState.horaFin,
-                        aula = horarioState.aula
-                    )
-                    horarioViewModel.agregarHorario(nuevoHorario)
-                },
-                onEditarHorario = { horario ->
-                    horarioViewModel.actualizarHorario(horario)
-                },
-                onEliminarHorario = { horario ->
-                    horarioViewModel.eliminarHorario(horario)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            PruebasSection(
-                tiposPrueba = tiposPrueba,
-                onAgregarTipoPrueba = { pruebaDialogState ->
-                    val nuevoTipoPrueba = TipoPrueba(
-                        idCurso = cursoId,
-                        nombreTipo = pruebaDialogState.tipo,
-                        cantidadPruebas = pruebaDialogState.numero.toIntOrNull() ?: 0,
-                        pesoTotal = pruebaDialogState.peso.toDoubleOrNull() ?: 0.0
-                    )
-                    tipoPruebaViewModel.agregarTipoPrueba(nuevoTipoPrueba)
-                },
-                onEditarTipoPrueba = { tipoPrueba ->
-                    tipoPruebaViewModel.actualizarTipoPrueba(tipoPrueba)
-                },
-                onEliminarTipoPrueba = { tipoPrueba ->
-                    tipoPruebaViewModel.eliminarTipoPrueba(tipoPrueba)
-                },
-                onScreenSelected = onScreenSelected,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(32.dp))
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+                    .semantics {
+                        contentDescription = "Detalles del curso ${cursoActual.nombreCurso}"
+                    },
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CursoHeader(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .scale(headerScale),
+                    onScreenSelected = { screen ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onScreenSelected(screen)
+                    },
+                    cursoNombre = cursoActual.nombreCurso,
+                    cursoColor = cursoActual.color ?: "#FFFFFF"
+                )
+
+                CursoInfo(
+                    profesor = cursoActual.profesor ?: "N/A",
+                    aula = cursoActual.aula ?: "N/A"
+                )
+
+                HorarioSection(
+                    horarios = horarios,
+                    onAgregarHorario = { horarioState ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        val nuevoHorario = Horario(
+                            idCurso = cursoId,
+                            diaSemana = horarioState.dia,
+                            horaInicio = horarioState.horaInicio,
+                            horaFin = horarioState.horaFin,
+                            aula = horarioState.aula
+                        )
+                        horarioViewModel.agregarHorario(nuevoHorario)
+                    },
+                    onEditarHorario = { horario ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        horarioViewModel.actualizarHorario(horario)
+                    },
+                    onEliminarHorario = { horario ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        horarioViewModel.eliminarHorario(horario)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                PruebasSection(
+                    tiposPrueba = tiposPrueba,
+                    onAgregarTipoPrueba = { pruebaDialogState ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        val nuevoTipoPrueba = TipoPrueba(
+                            idCurso = cursoId,
+                            nombreTipo = pruebaDialogState.tipo,
+                            cantidadPruebas = pruebaDialogState.numero.toIntOrNull() ?: 0,
+                            pesoTotal = pruebaDialogState.peso.toDoubleOrNull() ?: 0.0
+                        )
+                        tipoPruebaViewModel.agregarTipoPrueba(nuevoTipoPrueba)
+                    },
+                    onEditarTipoPrueba = { tipoPrueba ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        tipoPruebaViewModel.actualizarTipoPrueba(tipoPrueba)
+                    },
+                    onEliminarTipoPrueba = { tipoPrueba ->
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        tipoPruebaViewModel.eliminarTipoPrueba(tipoPrueba)
+                    },
+                    onScreenSelected = onScreenSelected,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
     } ?: run {
-        // Opcional: mientras carga o no existe curso, muestra algo
+        // Estado de carga mejorado
         Box(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier
+                .fillMaxSize()
+                .semantics {
+                    contentDescription = "Cargando información del curso"
+                },
             contentAlignment = Alignment.Center
         ) {
-            Text("Cargando información del curso...")
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Cargando información del curso...",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -170,47 +252,95 @@ private fun CursoHeader(
     onScreenSelected: (String) -> Unit,
     cursoNombre: String,
     cursoColor: String = "#FFFFFF"
-
 ) {
-    Row(
+    val hapticFeedback = LocalHapticFeedback.current
+
+    Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp,
+            hoveredElevation = 8.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-        IconButton(
-            onClick = { onScreenSelected("lisCurso") },
+        Row(
             modifier = Modifier
-                .size(40.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.ArrowBackIosNew,
-                contentDescription = "Regresar",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            // Botón de regreso con feedback háptico
+            FilledIconButton(
+                onClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onScreenSelected("lisCurso")
+                },
+                modifier = Modifier
+                    .semantics {
+                        contentDescription = "Regresar a la lista de cursos"
+                    },
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBackIosNew,
+                    contentDescription = null
+                )
+            }
+
+            // Icono del curso con color personalizado
+            Card(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(parseColor(cursoColor)).copy(alpha = 0.2f)
+                )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Book,
+                        contentDescription = "Icono del curso",
+                        tint = Color(parseColor(cursoColor)),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            // Nombre del curso con mejor tipografía
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics {
+                        contentDescription = "Curso: $cursoNombre"
+                    }
+            ) {
+                Text(
+                    text = "DETALLES DEL CURSO",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+                Text(
+                    text = cursoNombre,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
-        Spacer(modifier = Modifier.padding(end = 10.dp))
-
-        Icon(
-            imageVector = Icons.Filled.Book,
-            contentDescription = "Icono del curso",
-            tint = Color(parseColor(cursoColor)),
-            modifier = Modifier.size(40.dp)
-        )
-
-        Text(
-            text = cursoNombre,
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier
-                .padding(horizontal = 2.dp)
-                ,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-
     }
 }
 
@@ -221,38 +351,95 @@ private fun CursoInfo(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            hoveredElevation = 4.dp
+        )
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(20.dp)
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Información del curso. Profesor: $profesor, Modalidad: $aula"
+                },
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Profesor: $profesor",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                text = "INFORMACIÓN DEL CURSO",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                fontWeight = FontWeight.SemiBold
             )
-            Text(
-                text = "Modalidad: $aula",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+
+            // Información del profesor
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Column {
+                    Text(
+                        text = "Profesor",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = profesor,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+
+            // Información del aula/modalidad
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Column {
+                    Text(
+                        text = "Modalidad",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = aula,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
         }
     }
 }
 
-
-
-
-///section tipo de pruebas
+// Section tipo de pruebas
 @Composable
-internal fun PruebasSection(
+private fun PruebasSection(
     tiposPrueba: List<TipoPrueba>,
     onAgregarTipoPrueba: (PruebaDialogState) -> Unit,
     onEditarTipoPrueba: (TipoPrueba) -> Unit,
@@ -614,7 +801,7 @@ private fun DialogoAgregarPrueba(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = Color.White
                     )
-                    ) {
+                ) {
                     Text("Cancelar")
                 }
             }
@@ -625,100 +812,203 @@ private fun DialogoAgregarPrueba(
 //section horario
 
 @Composable
-internal fun HorarioSection(
+private fun HorarioSection(
     horarios: List<Horario>,
     onAgregarHorario: (HorarioDialogState) -> Unit,
     onEditarHorario: (Horario) -> Unit,
     onEliminarHorario: (Horario) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     var showDialog by remember { mutableStateOf(false) }
     var horarioSeleccionado by remember { mutableStateOf<Horario?>(null) }
+    var isVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = slideInVertically(
+            initialOffsetY = { it / 3 },
+            animationSpec = tween(400, delayMillis = 200)
+        ) + fadeIn(tween(400, delayMillis = 200)),
+        exit = slideOutVertically() + fadeOut()
     ) {
-        Text(
-            text = "Horario",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        if (horarios.isEmpty()) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No hay horarios agregados",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(scrollState)
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                horarios.forEach { horario ->
-                    HorarioCard(
-                        dia = horario.diaSemana,
-                        horaInicio = horario.horaInicio,
-                        horaFin = horario.horaFin,
-                        aula = horario.aula,
-                        modifier = Modifier.width(160.dp),
-                        onEdit = { horarioSeleccionado = horario },
-                        onDelete = { onEliminarHorario(horario) }
-                    )
-                }
-            }
-        }
-
-        Button(
-            onClick = { showDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3355ff)
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                hoveredElevation = 4.dp
             )
         ) {
-            Text("Agregar horario")
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .semantics {
+                        contentDescription = if (horarios.isEmpty()) {
+                            "Sección de horarios, sin horarios agregados"
+                        } else {
+                            "Sección de horarios, ${horarios.size} horarios agregados"
+                        }
+                    },
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Header con botón de agregar
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Schedule,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "HORARIOS",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
-        DialogoAgregarHorario(
-            showDialog = showDialog,
-            onDismiss = { showDialog = false },
-            onConfirm = { horarioState ->
-                onAgregarHorario(horarioState)
-                showDialog = false
+                    FilledIconButton(
+                        onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showDialog = true
+                        },
+                        modifier = Modifier
+                            .semantics {
+                                contentDescription = "Agregar nuevo horario"
+                            },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                if (horarios.isEmpty()) {
+                    // Estado vacío mejorado
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AccessTime,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No hay horarios agregados",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Toca + para agregar uno",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(scrollState)
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        horarios.forEachIndexed { index, horario ->
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = scaleIn(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    ),
+                                    initialScale = 0.8f
+                                ) + fadeIn(tween(300, delayMillis = index * 50))
+                            ) {
+                                HorarioCard(
+                                    dia = horario.diaSemana,
+                                    horaInicio = horario.horaInicio,
+                                    horaFin = horario.horaFin,
+                                    aula = horario.aula,
+                                    modifier = Modifier.width(180.dp),
+                                    onEdit = {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        horarioSeleccionado = horario
+                                    },
+                                    onDelete = {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onEliminarHorario(horario)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                DialogoAgregarHorario(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false },
+                    onConfirm = { horarioState ->
+                        onAgregarHorario(horarioState)
+                        showDialog = false
+                    }
+                )
+
+                horarioSeleccionado?.let { horario ->
+                    DialogoEditarHorario(
+                        horario = horario,
+                        onDismiss = { horarioSeleccionado = null },
+                        onConfirm = { onEditarHorario(it) }
+                    )
+                }
             }
-        )
-
-        horarioSeleccionado?.let { horario ->
-            DialogoEditarHorario(
-                horario = horario,
-                onDismiss = { horarioSeleccionado = null },
-                onConfirm = { onEditarHorario(it) }
-            )
         }
     }
 }
 
 @Composable
-private fun HorarioCard(
+fun HorarioCard(
     dia: String,
     horaInicio: String,
     horaFin: String,
@@ -727,73 +1017,136 @@ private fun HorarioCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
+
     Card(
-        modifier = modifier.height(100.dp),
+        modifier = modifier
+            .height(140.dp)
+            .semantics {
+                contentDescription = "Horario de $dia de $horaInicio a $horaFin en $aula"
+            },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp,
+            hoveredElevation = 8.dp
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            // Header con día
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = dia,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    textAlign = TextAlign.Center
+                    text = dia.uppercase(),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            // Información de tiempo y aula
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = horaInicio,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    Icon(
+                        imageVector = Icons.Filled.AccessTime,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.size(12.dp)
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = " - ",
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = horaFin,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        text = "$horaInicio - $horaFin",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
-                Text(
-                    text = aula,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    textAlign = TextAlign.Center
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(top = 8.dp)
+
+                if (aula.isNotBlank()) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = aula,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            // Botones de acción
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onEdit()
+                    },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .semantics {
+                            contentDescription = "Editar horario de $dia"
+                        }
                 ) {
-                    IconButton(onClick = onEdit) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Eliminar",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDelete()
+                    },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .semantics {
+                            contentDescription = "Eliminar horario de $dia"
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
@@ -851,9 +1204,8 @@ private fun DialogoEditarHorario(
                         aula = state.aula
                     )
                 )
-            }
-            )
-            {
+                onDismiss()
+            }) {
                 Text("Guardar")
             }
         },
@@ -864,7 +1216,6 @@ private fun DialogoEditarHorario(
         }
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -965,19 +1316,29 @@ private fun DialogoAgregarHorario(
                     if (showTimePickerInicio) {
                         val timePickerState = rememberTimePickerState()
                         TimePickerDialog(
-                            onCancel = { showTimePickerInicio = false },
-                            onConfirm = {
-                                val hora = timePickerState.hour
-                                val minuto = timePickerState.minute.toString().padStart(2, '0')
-                                val periodo = if (hora < 12) "AM" else "PM"
-                                val hora12 = when (hora) {
-                                    0 -> "12"
-                                    in 1..12 -> hora.toString()
-                                    else -> (hora - 12).toString()
-                                }.padStart(2, '0')
-                                state = state.copy(horaInicio = "$hora12:$minuto $periodo")
-                                showTimePickerInicio = false
+                            onDismissRequest = { showTimePickerInicio = false },
+                            confirmButton = {
+                                Button(onClick = {
+                                    val hora = timePickerState.hour
+                                    val minuto = timePickerState.minute.toString().padStart(2, '0')
+                                    val periodo = if (hora < 12) "AM" else "PM"
+                                    val hora12 = when (hora) {
+                                        0 -> "12"
+                                        in 1..12 -> hora.toString()
+                                        else -> (hora - 12).toString()
+                                    }.padStart(2, '0')
+                                    state = state.copy(horaInicio = "$hora12:$minuto $periodo")
+                                    showTimePickerInicio = false
+                                }) {
+                                    Text("Aceptar")
+                                }
                             },
+                            dismissButton = {
+                                Button(onClick = { showTimePickerInicio = false }) {
+                                    Text("Cancelar")
+                                }
+                            },
+                            title = { Text("Seleccionar hora de inicio") },
                             content = { TimePicker(state = timePickerState) }
                         )
                     }
@@ -985,19 +1346,29 @@ private fun DialogoAgregarHorario(
                     if (showTimePickerFin) {
                         val timePickerState = rememberTimePickerState()
                         TimePickerDialog(
-                            onCancel = { showTimePickerFin = false },
-                            onConfirm = {
-                                val hora = timePickerState.hour
-                                val minuto = timePickerState.minute.toString().padStart(2, '0')
-                                val periodo = if (hora < 12) "AM" else "PM"
-                                val hora12 = when (hora) {
-                                    0 -> "12"
-                                    in 1..12 -> hora.toString()
-                                    else -> (hora - 12).toString()
-                                }.padStart(2, '0')
-                                state = state.copy(horaFin = "$hora12:$minuto $periodo")
-                                showTimePickerFin = false
+                            onDismissRequest = { showTimePickerFin = false },
+                            confirmButton = {
+                                Button(onClick = {
+                                    val hora = timePickerState.hour
+                                    val minuto = timePickerState.minute.toString().padStart(2, '0')
+                                    val periodo = if (hora < 12) "AM" else "PM"
+                                    val hora12 = when (hora) {
+                                        0 -> "12"
+                                        in 1..12 -> hora.toString()
+                                        else -> (hora - 12).toString()
+                                    }.padStart(2, '0')
+                                    state = state.copy(horaFin = "$hora12:$minuto $periodo")
+                                    showTimePickerFin = false
+                                }) {
+                                    Text("Aceptar")
+                                }
                             },
+                            dismissButton = {
+                                Button(onClick = { showTimePickerFin = false }) {
+                                    Text("Cancelar")
+                                }
+                            },
+                            title = { Text("Seleccionar hora de fin") },
                             content = { TimePicker(state = timePickerState) }
                         )
                     }
@@ -1016,12 +1387,13 @@ private fun DialogoAgregarHorario(
                 }
             },
             dismissButton = {
-                Button(onClick = onDismiss,
+                Button(
+                    onClick = onDismiss,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFf60a0a),
                         contentColor = Color.White
                     )
-                    ) {
+                ) {
                     Text("Cancelar")
                 }
             }
@@ -1032,23 +1404,17 @@ private fun DialogoAgregarHorario(
 @ExperimentalMaterial3Api
 @Composable
 private fun TimePickerDialog(
-    onCancel: () -> Unit,
-    onConfirm: () -> Unit,
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    dismissButton: @Composable () -> Unit,
+    title: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = onCancel,
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Aceptar")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onCancel) {
-                Text("Cancelar")
-            }
-        },
-        text = { content() }
+        onDismissRequest = onDismissRequest,
+        confirmButton = confirmButton,
+        dismissButton = dismissButton,
+        title = title,
+        text = content
     )
 }
-
