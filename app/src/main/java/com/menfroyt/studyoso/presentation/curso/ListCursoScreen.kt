@@ -1,7 +1,19 @@
 package com.menfroyt.studyoso.presentation.curso
 
 import android.graphics.Color.parseColor
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,29 +26,53 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,20 +81,6 @@ import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.entities.Curso
 import com.menfroyt.studyoso.data.repositories.CursoRepository
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 
 @Composable
 fun ListCursoScreen(
@@ -67,6 +89,7 @@ fun ListCursoScreen(
     usuarioId: Int
 ) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
 
     // Instancia DB, repo y ViewModel
     val db = remember { AppDatabase.getInstance(context) }
@@ -78,44 +101,118 @@ fun ListCursoScreen(
     // Observa los cursos del ViewModel
     val cursos by cursoViewModel.cursos.collectAsState()
 
+    // Animación para el FAB
+    val fabScale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "fab_scale"
+    )
+
     // Carga cursos para el usuarioId
     LaunchedEffect(usuarioId) {
         cursoViewModel.cargarCursos(usuarioId)
     }
 
+    // Contenedor principal mejorado
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
+        // Header con título mejorado
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            if (cursos.isEmpty()) {
-                EmptyState()
-            } else {
-                CursoList(
-                    cursos = cursos,
-                    onScreenSelected = onScreenSelected,
-                    onDeleteCurso = { curso ->
-                        cursoViewModel.eliminarCurso(curso)
-                    },
-                    onUpdateCurso = { curso ->
-                        cursoViewModel.actualizarCurso(curso)
-                    },
-                )
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.School,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Mis Cursos",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Gestiona tus materias académicas",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Contenido principal con animaciones
+                AnimatedVisibility(
+                    visible = cursos.isEmpty(),
+                    enter = fadeIn(animationSpec = tween(300)) + scaleIn(),
+                    exit = fadeOut(animationSpec = tween(300)) + scaleOut()
+                ) {
+                    EmptyState()
+                }
+
+                AnimatedVisibility(
+                    visible = cursos.isNotEmpty(),
+                    enter = fadeIn(animationSpec = tween(300)) + slideInVertically(),
+                    exit = fadeOut(animationSpec = tween(300)) + slideOutVertically()
+                ) {
+                    CursoList(
+                        cursos = cursos,
+                        onScreenSelected = onScreenSelected,
+                        onDeleteCurso = { curso ->
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            cursoViewModel.eliminarCurso(curso)
+                        },
+                        onUpdateCurso = { curso ->
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            cursoViewModel.actualizarCurso(curso)
+                        },
+                    )
+                }
             }
         }
 
+        // FAB mejorado con animaciones
         FloatingActionButton(
-            onClick = { onScreenSelected("AgregarCursos") },
+            onClick = { 
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onScreenSelected("AgregarCursos") 
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            containerColor = Color(0xFF3355ff),
-            contentColor = MaterialTheme.colorScheme.onPrimary
+                .padding(16.dp)
+                .scale(fabScale)
+                .semantics { 
+                    contentDescription = "Agregar nuevo curso" 
+                },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(16.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = "Agregar Curso",
+                contentDescription = null,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -134,48 +231,83 @@ private fun CursoList(
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp)
+            .padding(top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(bottom = 80.dp) // Espacio para el FAB
     ) {
         items(
             count = cursos.size,
             key = { cursos[it].idCurso }
         ) { index ->
             val curso = cursos[index]
-            CursoItem(
-                curso = curso,
-                onClick = { onScreenSelected("DetalleCurso/${curso.idCurso}") },
-                onDelete = { onDeleteCurso(curso) },
-                onUpdate = onUpdateCurso,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-            )
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(animationSpec = tween(300, delayMillis = index * 50)) + 
+                        slideInVertically(initialOffsetY = { it / 4 }),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                CursoItem(
+                    curso = curso,
+                    onClick = { onScreenSelected("DetalleCurso/${curso.idCurso}") },
+                    onDelete = { onDeleteCurso(curso) },
+                    onUpdate = onUpdateCurso,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun EmptyState() {
+    val haptic = LocalHapticFeedback.current
+    
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
+        modifier = Modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.AddToPhotos,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = Color(0xFF3355ff)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // Ícono principal con animación
+        Card(
+            modifier = Modifier.size(120.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AddToPhotos,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Texto principal mejorado
         Text(
             text = "No hay cursos agregados",
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Comienza agregando tus primeros cursos para organizar tu estudio",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -190,59 +322,140 @@ private fun CursoItem(
     modifier: Modifier = Modifier
 ) {
     var mostrarDialogoActualizar by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clickable { 
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick() 
+            }
+            .semantics { 
+                contentDescription = "Ver detalles del curso ${curso.nombreCurso}" 
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Filled.Book,
-                contentDescription = null,
-                tint = Color(parseColor(curso.color)),
-                modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 16.dp)
-            )
+            // Ícono del curso con mejor diseño
+            Card(
+                modifier = Modifier.size(60.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(parseColor(curso.color)).copy(alpha = 0.1f)
+                )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Book,
+                        contentDescription = null,
+                        tint = Color(parseColor(curso.color)),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // Información del curso mejorada
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = curso.nombreCurso.toString(),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = curso.aula.toString(),
-                    style = MaterialTheme.typography.titleSmall
-                )
-                Text(
-                    text = curso.creditos.toString(),
-                    style = MaterialTheme.typography.titleSmall
-                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = curso.aula.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(2.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${curso.creditos} créditos",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-            Icon(
-                imageVector = Icons.Filled.Create,
-                contentDescription = "Actualizar curso",
-                modifier = Modifier
-                    .clickable { mostrarDialogoActualizar = true }
-                    .padding(8.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Eliminar curso",
-                modifier = Modifier
-                    .clickable(onClick = onDelete)
-                    .padding(8.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
+            
+            // Botones de acción mejorados
+            Row {
+                IconButton(
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        mostrarDialogoActualizar = true 
+                    },
+                    modifier = Modifier.semantics { 
+                        contentDescription = "Editar curso ${curso.nombreCurso}" 
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Create,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                
+                IconButton(
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDelete() 
+                    },
+                    modifier = Modifier.semantics { 
+                        contentDescription = "Eliminar curso ${curso.nombreCurso}" 
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
 
         if (mostrarDialogoActualizar) {
