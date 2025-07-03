@@ -30,7 +30,7 @@ fun GuiaScreen(
         LazyColumn(
             modifier = modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {

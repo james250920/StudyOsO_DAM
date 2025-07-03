@@ -111,11 +111,12 @@ fun ListCalificacionScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+
         ) {
             Column(
                 modifier = Modifier.padding(20.dp)
@@ -275,7 +276,7 @@ private fun EmptyState(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),

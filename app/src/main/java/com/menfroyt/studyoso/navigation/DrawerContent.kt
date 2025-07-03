@@ -39,7 +39,7 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
         Text(
             text = "Menú",
             style = MaterialTheme.typography.headlineSmall,
-            color = Color(0xFF3355ff),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         DrawerOption(
@@ -111,13 +111,14 @@ fun DrawerOption(
             imageVector = icon,
             contentDescription = "Ir a $text",
             tint = when (text) {
-                "Home" -> if (selectedScreen == "Principal") Color(0xFF33c1ff) else Color(0xFF3355ff)
-                "Dashboard" -> if (selectedScreen == "Dashboard") Color(0xFF33c1ff) else Color(0xFF3355ff)
-                "Calendario" -> if (selectedScreen == "Calendario") Color(0xFF33c1ff) else Color(0xFF3355ff)
-                "Perfil" -> if (selectedScreen == "Perfil") Color(0xFF33c1ff) else Color(0xFF3355ff)
-                "Configuración" -> if (selectedScreen == "Configuración") Color(0xFF33c1ff) else Color(0xFF3355ff)
-                "Pomodoro" -> if (selectedScreen == "Pomodoro") Color(0xFF33c1ff) else Color(0xFF3355ff)
-                "Cerrar Sesión" -> Color(0xFF3355ff) // No resaltamos "Cerrar Sesión"
+                "Home" -> if (selectedScreen == "Principal") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Guia" -> if (selectedScreen == "Guia") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Dashboard" -> if (selectedScreen == "Dashboard") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Calendario" -> if (selectedScreen == "Calendario") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Perfil" -> if (selectedScreen == "Perfil") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Configuración" -> if (selectedScreen == "Configuración") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Pomodoro" -> if (selectedScreen == "Pomodoro") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+                "Cerrar Sesión" -> MaterialTheme.colorScheme.primary // No resaltamos "Cerrar Sesión"
                 else -> MaterialTheme.colorScheme.primary
             },
             modifier = Modifier.size(24.dp)
@@ -127,12 +128,13 @@ fun DrawerOption(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
             color = when (text) {
-                "Home" -> if (selectedScreen == "Principal") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
-                "Dashboard" -> if (selectedScreen == "Dashboard") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
-                "Calendario" -> if (selectedScreen == "Calendario") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
-                "Perfil" -> if (selectedScreen == "Perfil") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
-                "Configuración" -> if (selectedScreen == "Configuración") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
-                "Pomodoro" -> if (selectedScreen == "Pomodoro") Color(0xFF33c1ff) else MaterialTheme.colorScheme.onSurface
+                "Home" -> if (selectedScreen == "Principal") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                "Guia" -> if (selectedScreen == "Guia") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                "Dashboard" -> if (selectedScreen == "Dashboard") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                "Calendario" -> if (selectedScreen == "Calendario")MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                "Perfil" -> if (selectedScreen == "Perfil") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                "Configuración" -> if (selectedScreen == "Configuración") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
+                "Pomodoro" -> if (selectedScreen == "Pomodoro") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface
                 "Cerrar Sesión" -> MaterialTheme.colorScheme.onSurface // No resaltamos "Cerrar Sesión"
                 else -> MaterialTheme.colorScheme.onSurface
             }

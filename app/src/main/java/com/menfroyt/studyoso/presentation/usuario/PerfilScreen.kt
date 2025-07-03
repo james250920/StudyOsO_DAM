@@ -75,10 +75,9 @@ fun PerfilScreen(
     var loading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Cargar datos iniciales
     LaunchedEffect(usuarioId) {
         try {
-            // Cargar usuario
+
             usuarioViewModel.getUsuarioAutenticado(
                 id = usuarioId,
                 onSuccess = { usuario = it },
@@ -365,7 +364,6 @@ private fun ProfileHeaderCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(

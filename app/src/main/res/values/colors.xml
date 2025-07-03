@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Paleta original -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +8,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Paleta personalizada StudyOso -->
+    <color name="primary_blue">#1976D2</color>
+    <color name="secondary_lime">#C6FF00</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="text_dark">#212121</color>
+    <color name="accent_light_blue">#64B5F6</color>
+    <color name="surface_light">#F5F5F5</color>
 </resources>
