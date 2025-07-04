@@ -108,11 +108,25 @@ fun DashboardScreen(
         )
 
     }
+
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(backgroundGradient)
+    )
+    {
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp)
-            ,
+                .padding(start = 16.dp, end = 16.dp),
 
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -132,7 +146,7 @@ fun DashboardScreen(
                         isLandscape = isLandscape,
                         usuario = usuario?.nombre ?: "Usuario",
 
-                    )
+                        )
                 }
             }
 
@@ -222,7 +236,7 @@ fun DashboardScreen(
             }
 
         }
-      Spacer( modifier = Modifier.height(16.dp)) // Espacio al final de la lista
+        Spacer(modifier = Modifier.height(16.dp)) // Espacio al final de la lista
         if (loading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -242,7 +256,7 @@ fun DashboardScreen(
                 )
             }
         }
-
+    }
 }
 
 @Composable
@@ -293,13 +307,13 @@ private fun DashboardHeader(
                         imageVector = Icons.Filled.Today,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Hoy",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -636,6 +650,7 @@ private fun AcademicProgressCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ModernProximasTareasCard(
     tareas: List<Tarea>,
@@ -653,7 +668,7 @@ private fun ModernProximasTareasCard(
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(5.dp)
         ) {
             // Header
             Row(
@@ -704,13 +719,10 @@ private fun ModernProximasTareasCard(
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
                     )
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                    Text(text = "Ver todas",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Ver todas")
                 }
             }
             
@@ -969,7 +981,7 @@ private fun QuickActionButton(
     ) {
         if (isCompact) {
             Column(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(

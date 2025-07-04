@@ -185,10 +185,7 @@ fun Home(
                                     .semantics {
                                         contentDescription = if (isDarkTheme) "Cambiar a tema claro" else "Cambiar a tema oscuro"
                                     }
-                                    .background(
-                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                        CircleShape
-                                    )
+
                                     .padding(4.dp)
                             ) {
                                 Icon(
@@ -211,13 +208,7 @@ fun Home(
                                     .semantics {
                                         contentDescription = "Ver perfil de usuario"
                                     }
-                                    .background(
-                                        if (selectedScreen == "Perfil") 
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                        else 
-                                            Color.Transparent,
-                                        CircleShape
-                                    )
+
                                     .padding(4.dp)
                             ) {
                                 Icon(

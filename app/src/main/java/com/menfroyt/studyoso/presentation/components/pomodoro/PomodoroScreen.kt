@@ -146,14 +146,14 @@ fun PomodoroScreen(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.9f)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                                MaterialTheme.colorScheme.surface,
+                                MaterialTheme.colorScheme.surface
                             )
                         )
                     )
             )
-            
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -191,14 +191,14 @@ fun PomodoroScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        
+
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = currentColor.copy(alpha = 0.15f),
                             modifier = Modifier.padding(start = 6.dp)
                         ) {
                             Text(
-                                text = if (!isBreak) "${focusTime}m" 
+                                text = if (!isBreak) "${focusTime}m"
                                        else if (sessionCount % longBreakInterval == 0) "${longBreak}m"
                                        else "${shortBreak}m",
                                 style = typography.bodySmall.copy(
@@ -238,7 +238,7 @@ fun PomodoroScreen(
                                 shape = CircleShape
                             )
                     )
-                    
+
                     // Círculo interior (contenido)
                     Surface(
                         modifier = Modifier
@@ -261,9 +261,9 @@ fun PomodoroScreen(
                                     style = typography.displayLarge.copy(fontWeight = FontWeight.Bold),
                                     color = currentColor
                                 )
-                                
+
                                 Spacer(modifier = Modifier.height(16.dp))
-                                
+
                                 // Botón de Play/Pause
                                 FilledIconButton(
                                     onClick = { isRunning = !isRunning },
@@ -286,7 +286,7 @@ fun PomodoroScreen(
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
-                
+
                 // Controles de temporizador
                 Row(
                     modifier = Modifier
@@ -301,12 +301,12 @@ fun PomodoroScreen(
                         color = currentColor,
                         onClick = {
                             isRunning = false
-                            currentSeconds = if (!isBreak) focusTime * 60 
-                                            else if (sessionCount % longBreakInterval == 0) longBreak * 60 
+                            currentSeconds = if (!isBreak) focusTime * 60
+                                            else if (sessionCount % longBreakInterval == 0) longBreak * 60
                                             else shortBreak * 60
                         }
                     )
-                    
+
                     ControlButton(
                         icon = Icons.Filled.RestartAlt,
                         description = "Reiniciar sesiones",
@@ -318,7 +318,7 @@ fun PomodoroScreen(
                             isBreak = false
                         }
                     )
-                    
+
                     ControlButton(
                         icon = Icons.Filled.SkipNext,
                         description = "Siguiente intervalo",
@@ -350,7 +350,7 @@ fun PomodoroScreen(
                 },
                 currentColor = currentColor
             )
-            
+
             var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
             var selectedFile by remember { mutableStateOf<String?>(null) }
             var isPlaying by remember { mutableStateOf(false) }

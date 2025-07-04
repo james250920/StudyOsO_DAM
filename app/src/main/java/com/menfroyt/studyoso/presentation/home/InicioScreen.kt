@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -66,52 +67,68 @@ fun PrincipalScreen(
     modifier: Modifier = Modifier,
     onScreenSelected: (String) -> Unit
 ) {
-    Column(
+
+    // Gradiente de fondo moderno
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
+
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Tarjeta de eventos del día con diseño mejorado
-        EventosDelDiaCard(
+            .background(backgroundGradient)
+    )
+    {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            onViewAllClick = { onScreenSelected("Calendario") },
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Menú de opciones con mejor espaciado y animaciones
-        MenuOpciones(onScreenSelected)
-
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Imagen decorativa con mejor presentación
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-            )
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.study),
-                contentDescription = "Ilustración de estudio",
+            // Tarjeta de eventos del día con diseño mejorado
+            EventosDelDiaCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .padding(vertical = 8.dp),
+                onViewAllClick = { onScreenSelected("Calendario") },
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Menú de opciones con mejor espaciado y animaciones
+            MenuOpciones(onScreenSelected)
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Imagen decorativa con mejor presentación
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.study),
+                    contentDescription = "Ilustración de estudio",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
-        
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -32,108 +34,121 @@ import com.menfroyt.studyoso.R
 @Composable
 fun MatrizEisenhowerScreen(modifier: Modifier = Modifier, onScreenSelected: (String) -> Unit) {
 
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Matriz de Eisenhower",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = {
-                onScreenSelected(
-                    "AddTaskScreen"
-                )
-            },
+            .background(backgroundGradient)
+    )
+    {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3355ff), // Color de fondo del botón
-                contentColor = MaterialTheme.colorScheme.onPrimary  // Color del texto/contenido
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Matriz de Eisenhower",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
-        ) {
-            Text("Agregar tarea")
-        }
 
-
-
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically // Centra la imagen y el cuadrante verticalmente
-        ) {
-            Column(
-                modifier = Modifier.weight(1f), // La columna ocupa la mitad del espacio de la Row
-                horizontalAlignment = Alignment.CenterHorizontally // <--- AÑADE ESTO
+            Button(
+                onClick = {
+                    onScreenSelected(
+                        "AddTaskScreen"
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF3355ff), // Color de fondo del botón
+                    contentColor = MaterialTheme.colorScheme.onPrimary  // Color del texto/contenido
+                )
             ) {
-                // Cuadrante 1: Urgente e Importante
+                Text("Agregar tarea")
+            }
+
+
+
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                verticalAlignment = Alignment.CenterVertically // Centra la imagen y el cuadrante verticalmente
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f), // La columna ocupa la mitad del espacio de la Row
+                    horizontalAlignment = Alignment.CenterHorizontally // <--- AÑADE ESTO
+                ) {
+                    // Cuadrante 1: Urgente e Importante
+                    CuadranteMatriz(
+                        titulo = "Tienes que hacerlo",
+                        descripcion = "Urgente e Importante",
+                        color = Color(0xFFFF6B6B),
+                        //icon = Icons.Filled.Warning,
+                        modifier = Modifier
+                            .weight(1f) // Para que este cuadrante tome espacio vertical dentro de la Column
+                            .fillMaxWidth() // El cuadrante se expandirá al ancho de la Column
+                            .padding(2.dp),
+                        //icon = Icons.Filled.Warning,
+                        imageVector = painterResource(id = R.drawable.c1)
+                    )
+                }
+
+                // Cuadrante 2: No Urgente e Importante
                 CuadranteMatriz(
-                    titulo = "Tienes que hacerlo",
-                    descripcion = "Urgente e Importante",
-                    color = Color(0xFFFF6B6B),
-                    //icon = Icons.Filled.Warning,
+                    titulo = "Puedes decidir",
+                    descripcion = "No Urgente e Importante",
+                    color = Color(0xFF4ECDC4),
                     modifier = Modifier
-                        .weight(1f) // Para que este cuadrante tome espacio vertical dentro de la Column
-                        .fillMaxWidth() // El cuadrante se expandirá al ancho de la Column
+                        .weight(1f) // Cada cuadrante ocupa la mitad de la columna
+                        .fillMaxWidth()
                         .padding(2.dp),
-                    //icon = Icons.Filled.Warning,
-                    imageVector = painterResource(id = R.drawable.c1)
+                    //icon = Icons.Filled.Dataset,
+                    imageVector = painterResource(id = R.drawable.c2)
                 )
             }
 
-            // Cuadrante 2: No Urgente e Importante
-            CuadranteMatriz(
-                titulo = "Puedes decidir",
-                descripcion = "No Urgente e Importante",
-                color = Color(0xFF4ECDC4),
+            Row(
                 modifier = Modifier
-                    .weight(1f) // Cada cuadrante ocupa la mitad de la columna
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(2.dp),
-                //icon = Icons.Filled.Dataset,
-                imageVector =painterResource(id = R.drawable.c2)
-            )
-        }
+            ) {
+                // Cuadrante 3: Urgente y No Importante
+                CuadranteMatriz(
+                    titulo = "Puedes delegar",
+                    descripcion = "Urgente y No Importante",
+                    color = Color(0xFFFFBE0B),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(4.dp),
+                    //icon = Icons.Filled.Warning,
+                    imageVector = painterResource(id = R.drawable.c3)
+                )
 
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            // Cuadrante 3: Urgente y No Importante
-            CuadranteMatriz(
-                titulo = "Puedes delegar",
-                descripcion = "Urgente y No Importante",
-                color = Color(0xFFFFBE0B),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp),
-                //icon = Icons.Filled.Warning,
-                imageVector = painterResource(id = R.drawable.c3)
-            )
-
-            // Cuadrante 4: No Urgente y No Importante
-            CuadranteMatriz(
-                titulo = "Puedes postergarlo o eliminarlo",
-                descripcion = "No Urgente y No Importante",
-                color = Color(0xFF95A5A6),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp),
-                //icon = Icons.Filled.Warning,
-                imageVector = painterResource(id = R.drawable.c4)
-            )
+                // Cuadrante 4: No Urgente y No Importante
+                CuadranteMatriz(
+                    titulo = "Puedes postergarlo o eliminarlo",
+                    descripcion = "No Urgente y No Importante",
+                    color = Color(0xFF95A5A6),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(4.dp),
+                    //icon = Icons.Filled.Warning,
+                    imageVector = painterResource(id = R.drawable.c4)
+                )
+            }
         }
     }
 }

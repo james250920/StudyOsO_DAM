@@ -138,8 +138,9 @@ fun CalendarioScreen(modifier: Modifier = Modifier) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                         MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.background
+                        MaterialTheme.colorScheme.surface
                     )
                 )
             )
