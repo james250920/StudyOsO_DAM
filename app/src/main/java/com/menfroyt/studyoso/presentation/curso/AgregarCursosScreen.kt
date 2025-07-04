@@ -32,6 +32,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
 import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
@@ -111,10 +113,17 @@ fun AgregarCursosScreen(
             showSuccess = false
         }
     }
-
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
     // Contenedor principal con diseño mejorado
     Box(
         modifier = modifier.fillMaxSize()
+            .background(backgroundGradient)
     ) {
         Card(
             modifier = Modifier
@@ -330,7 +339,8 @@ fun AgregarCursosScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        , verticalAlignment = Alignment.CenterVertically
                         ) {
                             InputField(
                                 label = "Créditos",
@@ -358,7 +368,12 @@ fun AgregarCursosScreen(
                                         modifier = Modifier
                                             .menuAnchor()
                                             .fillMaxWidth(),
-                                        label = { Text("Modalidad") },
+                                        label = { Text(
+                                            text = "Modalidad",
+                                            //tamaño del texto más pequeño
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp)
+
+                                        ) },
                                         shape = RoundedCornerShape(12.dp)
                                     )
                                     ExposedDropdownMenu(

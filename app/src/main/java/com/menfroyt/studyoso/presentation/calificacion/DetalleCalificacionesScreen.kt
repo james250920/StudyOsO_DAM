@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -80,8 +81,18 @@ fun DetalleCalificacionesScreen(
         val promedioTipo = promediosPorTipo[tipo.nombreTipo] ?: 0.0
         promedioTipo * (tipo.pesoTotal / 100.0)
     }
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier.fillMaxSize()
+        .background(backgroundGradient)
+    ) {
         Scaffold(
             floatingActionButton = {
                 if (tiposPrueba.isNotEmpty()) {  // Solo muestra el FAB si hay tipos de prueba
@@ -102,7 +113,7 @@ fun DetalleCalificacionesScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(backgroundGradient)
                     .verticalScroll(rememberScrollState())
                     .padding(paddingValues)
             ) {

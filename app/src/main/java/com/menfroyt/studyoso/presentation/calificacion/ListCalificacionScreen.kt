@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Grade
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -378,9 +379,7 @@ private fun CursoItem(
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+
     ) {
         Row(
             modifier = Modifier
@@ -389,25 +388,12 @@ private fun CursoItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Ícono del curso con mejor diseño
-            Card(
-                modifier = Modifier.size(60.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(parseColor(curso.color)).copy(alpha = 0.1f)
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
                     Icon(
                         imageVector = Icons.Filled.Book,
-                        contentDescription = null,
+                        contentDescription = "null",
                         tint = Color(parseColor(curso.color)),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(60.dp)
                     )
-                }
-            }
             
             Spacer(modifier = Modifier.width(16.dp))
             
@@ -443,12 +429,21 @@ private fun CursoItem(
                 }
                 
                 Spacer(modifier = Modifier.height(2.dp))
-                
-                Text(
-                    text = curso.aula.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = curso.aula.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
             }
             
             // Indicador visual de calificaciones
@@ -459,7 +454,7 @@ private fun CursoItem(
                 )
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -474,7 +469,7 @@ private fun CursoItem(
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Medium
                         ),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }

@@ -39,6 +39,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -129,6 +130,14 @@ fun DetalleCursoScreen(
         isVisible = true
     }
 
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
+
     curso?.let { cursoActual ->
         AnimatedVisibility(
             visible = isVisible,
@@ -141,7 +150,7 @@ fun DetalleCursoScreen(
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(backgroundGradient)
                     .verticalScroll(scrollState)
                     .padding(16.dp)
                     .semantics {
@@ -404,14 +413,8 @@ private fun CursoInfo(
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
-            }
+                Spacer( modifier = Modifier.weight(0.7f) )
 
-            // Información del aula/modalidad
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = null,
@@ -433,6 +436,7 @@ private fun CursoInfo(
                     )
                 }
             }
+
         }
     }
 }

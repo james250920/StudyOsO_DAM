@@ -65,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -116,11 +117,19 @@ fun ListCursoScreen(
         cursoViewModel.cargarCursos(usuarioId)
     }
 
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface
+        )
+    )
+
     // Contenedor principal mejorado
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(backgroundGradient)
     ) {
         // Header con título mejorado
         Card(
@@ -336,9 +345,7 @@ private fun CursoItem(
             },
 
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+
     ) {
         Row(
             modifier = Modifier
@@ -347,25 +354,13 @@ private fun CursoItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Ícono del curso con mejor diseño
-            Card(
-                modifier = Modifier.size(60.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(parseColor(curso.color)).copy(alpha = 0.1f)
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
                     Icon(
                         imageVector = Icons.Filled.Book,
-                        contentDescription = null,
+                        contentDescription = "null",
                         tint = Color(parseColor(curso.color)),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(60.dp)
                     )
-                }
-            }
+
             
             Spacer(modifier = Modifier.width(16.dp))
             

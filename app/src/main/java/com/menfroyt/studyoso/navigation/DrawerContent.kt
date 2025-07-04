@@ -43,7 +43,7 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         DrawerOption(
-            text = "Guia",
+            text = "Guía",
             icon = Icons.Filled.SignLanguage,
             selectedScreen = selectedScreen,
             onClick = { onOptionSelected("Guia") }

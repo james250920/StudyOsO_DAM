@@ -48,6 +48,7 @@ import java.time.DayOfWeek
 import java.util.Locale
 import kotlin.text.get
 import kotlin.toString
+import android.graphics.Color as AndroidColor
 import com.menfroyt.studyoso.ViewModel.curso.CursoViewModel
 import com.menfroyt.studyoso.ViewModel.curso.CursoViewModelFactory
 import com.menfroyt.studyoso.ViewModel.Horario.HorarioViewModel
@@ -58,6 +59,46 @@ import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.HorarioRepository
 import com.menfroyt.studyoso.data.db.AppDatabase
 
+
+private fun parseColor(colorString: String?): Color {
+    return try {
+        if (colorString.isNullOrBlank()) {
+            Color(0xFF6200EE) // Color por defecto
+        } else {
+            // Asegurar que el string tenga formato hex válido
+            val cleanColorString = if (colorString.startsWith("#")) {
+                colorString
+            } else {
+                "#$colorString"
+            }
+            Color(AndroidColor.parseColor(cleanColorString))
+        }
+    } catch (e: Exception) {
+        Color(0xFF6200EE) // Color por defecto en caso de error
+    }
+}
+
+// Función auxiliar para parsing seguro de tiempo
+private fun safeParseTime(timeString: String): java.time.LocalTime {
+    return try {
+        java.time.LocalTime.parse(timeString)
+    } catch (e: Exception) {
+        // Si hay error, intentar con diferentes formatos comunes
+        try {
+            // Formato HH:mm
+            val parts = timeString.split(":")
+            if (parts.size >= 2) {
+                val hour = parts[0].toIntOrNull() ?: 0
+                val minute = parts[1].toIntOrNull() ?: 0
+                java.time.LocalTime.of(hour.coerceIn(0, 23), minute.coerceIn(0, 59))
+            } else {
+                java.time.LocalTime.of(0, 0)
+            }
+        } catch (e: Exception) {
+            java.time.LocalTime.of(0, 0)
+        }
+    }
+}
 
 enum class CalendarMode {
     MONTH, WEEK, DAY
@@ -835,7 +876,12 @@ private fun HorarioItem(
     var curso by remember { mutableStateOf<Curso?>(null) }
     
     LaunchedEffect(horario.idCurso) {
-        curso = cursoViewModel.getCursoById(horario.idCurso)
+        try {
+            curso = cursoViewModel.getCursoById(horario.idCurso)
+        } catch (e: Exception) {
+            // En caso de error, usar valores por defecto
+            curso = null
+        }
     }
 
     Row(
@@ -853,11 +899,7 @@ private fun HorarioItem(
             modifier = Modifier
                 .size(if (isTablet) 16.dp else 12.dp)
                 .background(
-                    color = try {
-                        Color(curso?.color?.toInt() ?: 0xFF6200EE.toInt())
-                    } catch (e: Exception) {
-                        MaterialTheme.colorScheme.primary
-                    },
+                    color = parseColor(curso?.color),
                     shape = CircleShape
                 )
         )
@@ -875,7 +917,11 @@ private fun HorarioItem(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${horario.horaInicio} - ${horario.horaFin}",
+                text = if (horario.horaInicio.isNotBlank() && horario.horaFin.isNotBlank()) {
+                    "${horario.horaInicio} - ${horario.horaFin}"
+                } else {
+                    "Hora no especificada"
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -908,7 +954,12 @@ private fun EnhancedHorarioCard(
     var curso by remember { mutableStateOf<Curso?>(null) }
     
     LaunchedEffect(horario.idCurso) {
-        curso = cursoViewModel.getCursoById(horario.idCurso)
+        try {
+            curso = cursoViewModel.getCursoById(horario.idCurso)
+        } catch (e: Exception) {
+            // En caso de error, usar valores por defecto
+            curso = null
+        }
     }
 
     Card(
@@ -932,11 +983,7 @@ private fun EnhancedHorarioCard(
                     .width(4.dp)
                     .height(if (isTablet) 60.dp else 48.dp)
                     .background(
-                        color = try {
-                            Color(curso?.color?.toInt() ?: 0xFF6200EE.toInt())
-                        } catch (e: Exception) {
-                            MaterialTheme.colorScheme.primary
-                        },
+                        color = parseColor(curso?.color),
                         shape = RoundedCornerShape(2.dp)
                     )
             )
@@ -967,7 +1014,11 @@ private fun EnhancedHorarioCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "${horario.horaInicio} - ${horario.horaFin}",
+                        text = if (horario.horaInicio.isNotBlank() && horario.horaFin.isNotBlank()) {
+                            "${horario.horaInicio} - ${horario.horaFin}"
+                        } else {
+                            "Hora no especificada"
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -999,8 +1050,8 @@ private fun EnhancedHorarioCard(
                 horizontalAlignment = Alignment.End
             ) {
                 val now = java.time.LocalTime.now()
-                val startTime = java.time.LocalTime.parse(horario.horaInicio)
-                val endTime = java.time.LocalTime.parse(horario.horaFin)
+                val startTime = safeParseTime(horario.horaInicio)
+                val endTime = safeParseTime(horario.horaFin)
                 
                 val status = when {
                     now.isBefore(startTime) -> "Próximo"

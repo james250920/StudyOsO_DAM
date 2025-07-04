@@ -324,7 +324,6 @@ private fun PerfilContent(
                         selectedAction = action
                         when (action) {
                             "editar" -> showEditDialog = true
-                            "configuracion" -> onScreenSelected("configuracion")
                             "calificaciones" -> onScreenSelected("ListCalificaciones")
                             "cursos" -> onScreenSelected("lisCurso")
                         }
@@ -703,7 +702,6 @@ private fun QuickActionsCard(
                 ) {
                     listOf(
                         ActionButton("Editar Perfil", Icons.Filled.Edit, "editar"),
-                        ActionButton("Configuración", Icons.Filled.Settings, "configuracion"),
                         ActionButton("Calificaciones", Icons.Filled.Grade, "calificaciones"),
                         ActionButton("Mis Cursos", Icons.Filled.School, "cursos")
                     ).forEach { action ->
@@ -723,7 +721,6 @@ private fun QuickActionsCard(
                 ) {
                     listOf(
                         ActionButton("Editar Perfil", Icons.Filled.Edit, "editar"),
-                        ActionButton("Configuración", Icons.Filled.Settings, "configuracion"),
                         ActionButton("Calificaciones", Icons.Filled.Grade, "calificaciones"),
                         ActionButton("Mis Cursos", Icons.Filled.School, "cursos")
                     ).forEach { action ->
