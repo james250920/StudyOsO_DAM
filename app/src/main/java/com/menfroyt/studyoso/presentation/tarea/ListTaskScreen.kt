@@ -11,6 +11,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
@@ -48,6 +50,7 @@ import com.menfroyt.studyoso.ViewModel.tarea.TareaViewModelFactory
 import com.menfroyt.studyoso.data.db.AppDatabase
 import com.menfroyt.studyoso.data.entities.Tarea
 import com.menfroyt.studyoso.data.repositories.TareaRepository
+import com.menfroyt.studyoso.presentation.utils.EisenhowerColors
 
 
 @Composable
@@ -133,6 +136,15 @@ fun ListTaskScreen(
                     }
                 }
 
+                // Resumen de tareas por categoría Eisenhower
+                AnimatedVisibility(
+                    visible = tareas.isNotEmpty(),
+                    enter = fadeIn(animationSpec = tween(300)) + slideInVertically(),
+                    exit = fadeOut(animationSpec = tween(300)) + slideOutVertically()
+                ) {
+                    EisenhowerSummary(tareas = tareas)
+                }
+
                 // Contenido principal con animaciones
                 AnimatedVisibility(
                     visible = tareas.isEmpty(),
@@ -214,7 +226,7 @@ private fun EmptyState() {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Assignment,
+                    imageVector = Icons.AutoMirrored.Filled.Assignment,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
                     tint = MaterialTheme.colorScheme.primary
@@ -295,10 +307,17 @@ private fun TaskItem(
             .semantics { 
                 contentDescription = "Tarea: ${tarea.descripcion}" 
             },
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(
+            width = 2.dp,
+            color = EisenhowerColors.getBorderColor(
+                tarea.esImportante, 
+                tarea.esUrgente,
+                alpha = 0.4f
+            )
         )
     ) {
         Column(
@@ -316,12 +335,18 @@ private fun TaskItem(
                     modifier = Modifier.size(40.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = when {
-                            tarea.esImportante && tarea.esUrgente -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-                            tarea.esImportante -> Color(0xFFFF9800).copy(alpha = 0.1f)
-                            tarea.esUrgente -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
-                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                        }
+                        containerColor = EisenhowerColors.getBackgroundColor(
+                            tarea.esImportante, 
+                            tarea.esUrgente, 
+                            alpha = 0.15f
+                        )
+                    ),
+                    border = BorderStroke(
+                        width = 1.dp, 
+                        color = EisenhowerColors.getBorderColor(
+                            tarea.esImportante, 
+                            tarea.esUrgente
+                        )
                     )
                 ) {
                     Box(
@@ -333,16 +358,14 @@ private fun TaskItem(
                                 tarea.esImportante && tarea.esUrgente -> Icons.Default.PriorityHigh
                                 tarea.esImportante -> Icons.Default.Task
                                 tarea.esUrgente -> Icons.Default.Speed
-                                else -> Icons.Default.Assignment
+                                else -> Icons.AutoMirrored.Filled.Assignment
                             },
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
-                            tint = when {
-                                tarea.esImportante && tarea.esUrgente -> MaterialTheme.colorScheme.error
-                                tarea.esImportante -> Color(0xFFFF9800)
-                                tarea.esUrgente -> MaterialTheme.colorScheme.tertiary
-                                else -> MaterialTheme.colorScheme.onSurfaceVariant
-                            }
+                            tint = EisenhowerColors.getColorForTask(
+                                tarea.esImportante, 
+                                tarea.esUrgente
+                            )
                         )
                     }
                 }
@@ -363,43 +386,82 @@ private fun TaskItem(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // Etiquetas de prioridad
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // Etiquetas de prioridad mejoradas con colores de Eisenhower
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        if (tarea.esImportante) {
-                            Card(
-                                shape = RoundedCornerShape(6.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFFF9800).copy(alpha = 0.1f)
+                        // Etiqueta principal de categoría Eisenhower
+                        Card(
+                            shape = RoundedCornerShape(8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = EisenhowerColors.getBackgroundColor(
+                                    tarea.esImportante, 
+                                    tarea.esUrgente, 
+                                    alpha = 0.15f
                                 )
-                            ) {
-                                Text(
-                                    text = "Importante",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = Color(0xFFFF9800)
+                            ),
+                            border = BorderStroke(
+                                width = 1.dp,
+                                color = EisenhowerColors.getBorderColor(
+                                    tarea.esImportante, 
+                                    tarea.esUrgente
                                 )
-                            }
+                            )
+                        ) {
+                            Text(
+                                text = EisenhowerColors.getTitleForQuadrant(
+                                    tarea.esImportante, 
+                                    tarea.esUrgente
+                                ),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = EisenhowerColors.getColorForTask(
+                                    tarea.esImportante, 
+                                    tarea.esUrgente
+                                )
+                            )
                         }
                         
-                        if (tarea.esUrgente) {
-                            Card(
-                                shape = RoundedCornerShape(6.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
-                                )
-                            ) {
-                                Text(
-                                    text = "Urgente",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
+                        // Etiquetas individuales si es necesario
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (tarea.esImportante) {
+                                Card(
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = EisenhowerColors.NoUrgenteImportante.copy(alpha = 0.1f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Importante",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = EisenhowerColors.NoUrgenteImportante
+                                    )
+                                }
+                            }
+                            
+                            if (tarea.esUrgente) {
+                                Card(
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = EisenhowerColors.UrgenteNoImportante.copy(alpha = 0.1f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Urgente",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = EisenhowerColors.UrgenteNoImportante
+                                    )
+                                }
                             }
                         }
                     }
@@ -609,4 +671,123 @@ private fun DialogoActualizarTarea(
             }
         }
     )
+}
+
+@Composable
+private fun EisenhowerSummary(
+    tareas: List<Tarea>,
+    modifier: Modifier = Modifier
+) {
+    val urgenteImportante = tareas.count { it.esUrgente && it.esImportante }
+    val noUrgenteImportante = tareas.count { !it.esUrgente && it.esImportante }
+    val urgenteNoImportante = tareas.count { it.esUrgente && !it.esImportante }
+    val noUrgenteNoImportante = tareas.count { !it.esUrgente && !it.esImportante }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Resumen por categorías",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Hacer Ahora - Urgente e Importante
+                SummaryItem(
+                    count = urgenteImportante,
+                    title = "Hacer Ahora",
+                    color = EisenhowerColors.UrgenteImportante,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                // Planificar - No Urgente e Importante
+                SummaryItem(
+                    count = noUrgenteImportante,
+                    title = "Planificar",
+                    color = EisenhowerColors.NoUrgenteImportante,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Delegar - Urgente y No Importante
+                SummaryItem(
+                    count = urgenteNoImportante,
+                    title = "Delegar",
+                    color = EisenhowerColors.UrgenteNoImportante,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                // Eliminar - No Urgente y No Importante
+                SummaryItem(
+                    count = noUrgenteNoImportante,
+                    title = "Eliminar",
+                    color = EisenhowerColors.NoUrgenteNoImportante,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryItem(
+    count: Int,
+    title: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.1f)
+        ),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.3f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = color
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }
