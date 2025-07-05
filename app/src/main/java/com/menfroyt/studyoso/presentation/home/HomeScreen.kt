@@ -506,7 +506,13 @@ fun Home(
                         selectedScreen == "Perfil" -> PerfilScreen(
                             modifier = Modifier.padding(innerPadding),
                             onScreenSelected = { screen -> selectedScreen = screen },
-                            usuarioId = usuarioId
+                            usuarioId = usuarioId,
+                            onLogout = {
+                                // Navegar de vuelta a la pantalla de login
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
                         )
                         selectedScreen == "Pomodoro" -> {
                             PomodoroScreen(

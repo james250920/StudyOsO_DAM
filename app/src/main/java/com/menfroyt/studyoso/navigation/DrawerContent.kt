@@ -24,8 +24,10 @@ import com.menfroyt.studyoso.presentation.auth.SessionManager
 
 
 @Composable
-fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
-                  ) {
+fun DrawerContent(
+    selectedScreen: String,
+    onOptionSelected: (String) -> Unit,
+    ) {
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
     Column(
@@ -85,7 +87,7 @@ fun DrawerContent(selectedScreen: String,onOptionSelected: (String) -> Unit,
 
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "Versión 1.0.0",
+            text = "Versión 0.0.1",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(top = 16.dp)

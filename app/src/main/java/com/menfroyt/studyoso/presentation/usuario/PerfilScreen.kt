@@ -45,13 +45,15 @@ import com.menfroyt.studyoso.data.entities.Usuario
 import com.menfroyt.studyoso.data.repositories.CalificacionRepository
 import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.UsuarioRepository
+import com.menfroyt.studyoso.presentation.auth.SessionManager
 
 
 @Composable
 fun PerfilScreen(
     modifier: Modifier = Modifier,
     usuarioId: Int,
-    onScreenSelected: (String) -> Unit
+    onScreenSelected: (String) -> Unit,
+    onLogout: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val db = remember { AppDatabase.getInstance(context) }
@@ -177,8 +179,15 @@ fun PerfilScreen(
                     cursos = curso,
                     calificaciones = calificacion,
                     usuario = usuarioNoNulo,
+                    usuarioViewModel = usuarioViewModel,
                     modifier = modifier,
-                    onScreenSelected = onScreenSelected
+                    onScreenSelected = onScreenSelected,
+                    onOptionSelected = { option ->
+                        when (option) {
+                            "Cerrar Sesión" -> onLogout?.invoke()
+                            else -> onScreenSelected(option)
+                        }
+                    }
                 )
             }
         }
@@ -190,8 +199,10 @@ private fun PerfilContent(
     cursos: List<Curso>,
     calificaciones: List<Calificacion>,
     usuario: Usuario,
+    usuarioViewModel: UsuarioViewModel,
     modifier: Modifier = Modifier,
-    onScreenSelected: (String) -> Unit
+    onScreenSelected: (String) -> Unit,
+    onOptionSelected: (String) -> Unit
 ) {
     val totalCreditos = remember(cursos) {
         cursos.sumOf { it.creditos ?: 0 }
@@ -203,10 +214,13 @@ private fun PerfilContent(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     val density = LocalDensity.current
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
     
     // Estados para animaciones
     var isVisible by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedAction by remember { mutableStateOf<String?>(null) }
     
     LaunchedEffect(Unit) {
@@ -326,6 +340,7 @@ private fun PerfilContent(
                             "editar" -> showEditDialog = true
                             "calificaciones" -> onScreenSelected("ListCalificaciones")
                             "cursos" -> onScreenSelected("lisCurso")
+                            "eliminar" -> showDeleteDialog = true
                         }
                     },
                     isLandscape = isLandscape
@@ -343,6 +358,29 @@ private fun PerfilContent(
                 onConfirm = { 
                     showEditDialog = false
                     // Aquí iría la lógica para actualizar el perfil
+                }
+            )
+        }
+        
+        // Diálogo de eliminación de cuenta
+        if (showDeleteDialog) {
+            DeleteAccountDialog(
+                onDismiss = { showDeleteDialog = false },
+                onConfirm = {
+                    showDeleteDialog = false
+                    usuarioViewModel.eliminarUsuario(
+                        usuario = usuario,
+                        onSuccess = {
+                            sessionManager.endSession()
+                            onOptionSelected("Cerrar Sesión")
+                        },
+                        onError = { error ->
+                            // Aquí podrías mostrar un mensaje de error
+                            // Por ahora, intentamos cerrar sesión de todos modos
+                            sessionManager.endSession()
+                            onOptionSelected("Cerrar Sesión")
+                        }
+                    )
                 }
             )
         }
@@ -703,7 +741,8 @@ private fun QuickActionsCard(
                     listOf(
                         ActionButton("Editar Perfil", Icons.Filled.Edit, "editar"),
                         ActionButton("Calificaciones", Icons.Filled.Grade, "calificaciones"),
-                        ActionButton("Mis Cursos", Icons.Filled.School, "cursos")
+                        ActionButton("Mis Cursos", Icons.Filled.School, "cursos"),
+                        ActionButton("Eliminar Cuenta", Icons.Filled.Delete, "eliminar")
                     ).forEach { action ->
                         ActionButtonCard(
                             title = action.title,
@@ -722,7 +761,8 @@ private fun QuickActionsCard(
                     listOf(
                         ActionButton("Editar Perfil", Icons.Filled.Edit, "editar"),
                         ActionButton("Calificaciones", Icons.Filled.Grade, "calificaciones"),
-                        ActionButton("Mis Cursos", Icons.Filled.School, "cursos")
+                        ActionButton("Mis Cursos", Icons.Filled.School, "cursos"),
+                        ActionButton("Eliminar Cuenta", Icons.Filled.Delete, "eliminar")
                     ).forEach { action ->
                         ActionButtonCard(
                             title = action.title,
@@ -907,6 +947,104 @@ private fun ProfileEditDialog(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Cerrar")
+            }
+        },
+        shape = RoundedCornerShape(24.dp),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.padding(16.dp)
+    )
+}
+
+@Composable
+private fun DeleteAccountDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Eliminar Cuenta",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        text = {
+            Column {
+                Text(
+                    text = "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Consecuencias:",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        listOf(
+                            "• Se eliminarán todos tus datos personales",
+                            "• Perderás acceso a todos tus cursos",
+                            "• Se borrarán todas tus calificaciones",
+                            "• No podrás recuperar la cuenta"
+                        ).forEach { item ->
+                            Text(
+                                text = item,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Eliminar Cuenta")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Cancelar")
             }
         },
         shape = RoundedCornerShape(24.dp),

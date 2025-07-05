@@ -42,9 +42,14 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
         }
     }
 
-    fun eliminarUsuario(usuario: Usuario) {
+    fun eliminarUsuario(usuario: Usuario, onSuccess: (() -> Unit)? = null, onError: ((String) -> Unit)? = null) {
         viewModelScope.launch {
-            repository.delete(usuario)
+            try {
+                repository.delete(usuario)
+                onSuccess?.invoke()
+            } catch (e: Exception) {
+                onError?.invoke("Error al eliminar usuario: ${e.message}")
+            }
         }
     }
     fun login(correo: String, contrasena: String, onSuccess: (Usuario) -> Unit, onError: (String) -> Unit) {
