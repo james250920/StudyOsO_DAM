@@ -385,18 +385,7 @@ private fun ModernStatsGrid(
             ),
             route = "lisCurso"
         ),
-        StatsCardData(
-            id = "progreso",
-            title = "Progreso Semanal",
-            value = "85%",
-            subtitle = "Objetivo cumplido",
-            icon = Icons.Filled.TrendingUp,
-            gradient = listOf(
-                Color(0xFF4CAF50), 
-                Color(0xFF81C784)
-            ),
-            route = "progreso"
-        )
+
     )
 
     LazyVerticalGrid(
@@ -405,7 +394,7 @@ private fun ModernStatsGrid(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
             .fillMaxWidth()
-            .height(if (isLandscape) 180.dp else 320.dp)
+            .height(if (isLandscape) 184.dp else 324.dp)
     ) {
         items(statsData.size) { index ->
             val stats = statsData[index]
