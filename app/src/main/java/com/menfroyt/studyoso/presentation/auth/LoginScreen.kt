@@ -299,24 +299,7 @@ private fun LoginForm(
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Enlace de "¿Olvidaste tu contraseña?"
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(
-                onClick = { 
-                    // TODO: Implementar funcionalidad de recuperar contraseña
-                },
-                enabled = !isLoading
-            ) {
-                Text(
-                    text = "¿Olvidaste tu contraseña?",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
+
     }
 }
 

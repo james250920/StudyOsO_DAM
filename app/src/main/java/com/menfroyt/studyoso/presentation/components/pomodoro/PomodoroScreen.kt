@@ -396,7 +396,7 @@ private fun FloatingControlPanel(
 ) {
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(24.dp)
             .offset(y = (-16).dp)
             .clip(RoundedCornerShape(28.dp))
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
