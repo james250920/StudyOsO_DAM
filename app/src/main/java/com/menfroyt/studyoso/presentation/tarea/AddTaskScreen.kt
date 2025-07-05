@@ -46,6 +46,9 @@ import com.menfroyt.studyoso.data.entities.Tarea
 import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.TareaRepository
 import java.time.LocalDate
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,8 +135,11 @@ fun AddTaskScreen(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-                        fechaVencimiento = formatter.format(java.util.Date(millis))
+                        // Convertir milisegundos UTC a LocalDate para evitar problemas de zona horaria
+                        val localDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        fechaVencimiento = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     }
                     showDatePicker = false
                 }) {
@@ -540,11 +546,19 @@ fun AddTaskScreen(
                             }
                             else -> {
                                 isLoading = true
+                                // Convertir la fecha del formato dd/MM/yyyy al formato yyyy-MM-dd para la base de datos
+                                val fechaVencimientoISO = try {
+                                    val fechaLocal = LocalDate.parse(fechaVencimiento, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                    fechaLocal.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                } catch (e: Exception) {
+                                    fechaVencimiento // Si hay error, usar el valor original
+                                }
+                                
                                 val nuevaTarea = Tarea(
                                     descripcion = descripcionTarea.trim(),
                                     esImportante = esImportante!!,
                                     esUrgente = esUrgente!!,
-                                    fechaVencimiento = fechaVencimiento,
+                                    fechaVencimiento = fechaVencimientoISO,
                                     fechaCreacion = LocalDate.now().toString(),
                                     estado = "Pendiente",
                                     idUsuario = usuarioId,

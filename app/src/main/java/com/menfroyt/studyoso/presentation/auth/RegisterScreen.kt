@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
@@ -43,6 +44,9 @@ import com.menfroyt.studyoso.utils.hashPassword
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +81,7 @@ fun RegisterScreen(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
+    var showTermsDialog by remember { mutableStateOf(false) }
     // DatePicker
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
@@ -387,8 +392,9 @@ fun RegisterScreen(navController: NavController) {
 
                 // Términos y condiciones mejorados
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showTermsDialog = true },
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                     )
@@ -654,9 +660,12 @@ fun RegisterScreen(navController: NavController) {
                     Button(
                         onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                                val date = java.util.Date(millis)
-                                fechaNacimiento = TextFieldValue(formatter.format(date))
+                                // Convertir milisegundos UTC a LocalDate para evitar problemas de zona horaria
+                                val localDate = Instant.ofEpochMilli(millis)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                                val formattedDate = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                fechaNacimiento = TextFieldValue(formattedDate)
                             }
                             showDatePicker = false
                         },
@@ -686,5 +695,78 @@ fun RegisterScreen(navController: NavController) {
                 )
             }
         }
+    }
+    if (showTermsDialog) {
+        AlertDialog(
+            onDismissRequest = { showTermsDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 12.dp,
+            title = {
+                Text(
+                    text = "Términos y Condiciones",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "Condiciones de Uso",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = """
+                    1. Al usar StudyOso, aceptas cumplir con estas condiciones.
+                    2. Tu cuenta es personal e intransferible.
+                    3. Eres responsable de mantener la seguridad de tu cuenta.
+                    4. No puedes usar la aplicación para actividades ilegales.
+                    5. Nos reservamos el derecho de suspender cuentas que violen estos términos.
+                    """.trimIndent(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Text(
+                        text = "Política de Privacidad",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = """
+                    1. Recopilamos solo la información necesaria para el funcionamiento de la app.
+                    2. Tus datos se almacenan de forma segura en tu dispositivo.
+                    3. No compartimos tu información personal con terceros.
+                    4. Puedes solicitar la eliminación de tus datos en cualquier momento.
+                    5. Utilizamos medidas de seguridad para proteger tu información.
+                    """.trimIndent(),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showTermsDialog = false },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Entendido")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showTermsDialog = false },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Cerrar")
+                }
+            }
+        )
     }
 }
