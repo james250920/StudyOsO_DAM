@@ -660,9 +660,9 @@ fun RegisterScreen(navController: NavController) {
                     Button(
                         onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                // Convertir milisegundos UTC a LocalDate para evitar problemas de zona horaria
+                                // Convertir milisegundos UTC usando UTC a LocalDate para evitar problemas de zona horaria
                                 val localDate = Instant.ofEpochMilli(millis)
-                                    .atZone(ZoneId.systemDefault())
+                                    .atZone(ZoneId.of("UTC"))
                                     .toLocalDate()
                                 val formattedDate = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                                 fechaNacimiento = TextFieldValue(formattedDate)

@@ -567,8 +567,11 @@ private fun DialogoActualizarTarea(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-                        fechaVencimiento = formatter.format(java.util.Date(millis))
+                        // Convertir milisegundos UTC a LocalDate usando UTC para evitar problemas de zona horaria
+                        val localDate = java.time.Instant.ofEpochMilli(millis)
+                            .atZone(java.time.ZoneId.of("UTC"))
+                            .toLocalDate()
+                        fechaVencimiento = localDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     }
                     showDatePicker = false
                 }) {

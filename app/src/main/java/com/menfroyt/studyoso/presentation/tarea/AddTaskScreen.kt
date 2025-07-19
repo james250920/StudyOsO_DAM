@@ -135,9 +135,9 @@ fun AddTaskScreen(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        // Convertir milisegundos UTC a LocalDate para evitar problemas de zona horaria
+                        // Convertir milisegundos UTC a LocalDate usando UTC para evitar problemas de zona horaria
                         val localDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.systemDefault())
+                            .atZone(ZoneId.of("UTC"))
                             .toLocalDate()
                         fechaVencimiento = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     }
