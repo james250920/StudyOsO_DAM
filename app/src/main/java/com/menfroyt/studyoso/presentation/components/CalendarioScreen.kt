@@ -685,8 +685,7 @@ private fun SemanaLista(
                 MaterialTheme.colorScheme.surface,
                 RoundedCornerShape(16.dp)
             )
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(8.dp),
     ) {
         items(diasSemana) { fecha ->
             val diaEnIngles = fecha.dayOfWeek.name
@@ -702,6 +701,10 @@ private fun SemanaLista(
                 isTablet = isTablet,
                 isSelected = fecha == selectedDate
             )
+            if (fecha != diasSemana.last()) {
+                Spacer(modifier = Modifier.height(8.dp)) // Espacio entre tarjetas
+            }
+
         }
     }
 }

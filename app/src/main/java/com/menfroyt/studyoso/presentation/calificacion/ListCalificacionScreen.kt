@@ -403,7 +403,7 @@ private fun CursoItem(
             ) {
                 Text(
                     text = curso.nombreCurso,
-                    style = MaterialTheme.typography.titleLarge.copy(
+                    style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.onSurface
