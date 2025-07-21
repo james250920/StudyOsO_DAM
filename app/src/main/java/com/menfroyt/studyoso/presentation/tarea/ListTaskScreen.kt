@@ -95,23 +95,11 @@ fun ListTaskScreen(
             .fillMaxSize()
             .background(backgroundGradient)
     ) {
-        // Header con título mejorado
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.TaskAlt,
@@ -174,7 +162,7 @@ fun ListTaskScreen(
                         }
                     )
                 }
-            }
+
         }
 
         // FAB mejorado con animaciones

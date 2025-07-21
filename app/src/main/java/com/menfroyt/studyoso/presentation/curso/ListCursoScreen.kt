@@ -130,90 +130,79 @@ fun ListCursoScreen(
         modifier = modifier
             .fillMaxSize()
             .background(backgroundGradient)
-    ) {
-        // Header con título mejorado
-        Card(
+    )  {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, ),
+
         ) {
-            Column(
-                modifier = Modifier.padding(20.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.School,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
+                Icon(
+                    imageVector = Icons.Default.School,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = "Mis Cursos",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "Mis Cursos",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Gestiona tus materias académicas",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // Contenido principal con animaciones
-                AnimatedVisibility(
-                    visible = cursos.isEmpty(),
-                    enter = fadeIn(animationSpec = tween(300)) + scaleIn(),
-                    exit = fadeOut(animationSpec = tween(300)) + scaleOut()
-                ) {
-                    EmptyState()
-                }
-
-                AnimatedVisibility(
-                    visible = cursos.isNotEmpty(),
-                    enter = fadeIn(animationSpec = tween(300)) + slideInVertically(),
-                    exit = fadeOut(animationSpec = tween(300)) + slideOutVertically()
-                ) {
-                    CursoList(
-                        cursos = cursos,
-                        onScreenSelected = onScreenSelected,
-                        onDeleteCurso = { curso ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            cursoViewModel.eliminarCurso(curso)
-                        },
-                        onUpdateCurso = { curso ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            cursoViewModel.actualizarCurso(curso)
-                        },
+                    Text(
+                        text = "Gestiona tus materias académicas",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-        }
+            // Lista de cursos con LazyColumn
+            if (cursos.isEmpty()) {
+                EmptyState()
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(cursos.size) { index ->
+                        val curso = cursos[index]
+                        CursoItem(
+                            curso = curso,
+                            onClick = { onScreenSelected("DetalleCurso/${curso.idCurso}") },
+                            onDelete = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                cursoViewModel.eliminarCurso(curso)
+                            },
+                            onUpdate = { cursoActualizado ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                cursoViewModel.actualizarCurso(cursoActualizado)
+                            },
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
 
-        // FAB mejorado con animaciones
+                    }
+                }
+            }
+        }
+        // FAB flotante en la esquina inferior derecha
         FloatingActionButton(
-            onClick = { 
+            onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onScreenSelected("AgregarCursos") 
+                onScreenSelected("AgregarCursos")
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
                 .scale(fabScale)
-                .semantics { 
-                    contentDescription = "Agregar nuevo curso" 
+                .semantics {
+                    contentDescription = "Agregar nuevo curso"
                 },
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -228,47 +217,8 @@ fun ListCursoScreen(
     }
 }
 
-
 @Composable
-private fun CursoList(
-    cursos: List<Curso>,
-    onScreenSelected: (String) -> Unit,
-    onDeleteCurso: (Curso) -> Unit,
-    onUpdateCurso: (Curso) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(bottom = 80.dp) // Espacio para el FAB
-    ) {
-        items(
-            count = cursos.size,
-            key = { cursos[it].idCurso }
-        ) { index ->
-            val curso = cursos[index]
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(animationSpec = tween(300, delayMillis = index * 50)) + 
-                        slideInVertically(initialOffsetY = { it / 4 }),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                CursoItem(
-                    curso = curso,
-                    onClick = { onScreenSelected("DetalleCurso/${curso.idCurso}") },
-                    onDelete = { onDeleteCurso(curso) },
-                    onUpdate = onUpdateCurso,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyState() {
+fun EmptyState() {
     val haptic = LocalHapticFeedback.current
     
     Column(
