@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -469,109 +470,208 @@ private fun PruebasSection(
     modifier: Modifier = Modifier,
     onScreenSelected: (String) -> Unit,
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     var showDialog by remember { mutableStateOf(false) }
     var tipoPruebaSeleccionado by remember { mutableStateOf<TipoPrueba?>(null) }
+    var isVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = slideInVertically(
+            initialOffsetY = { it / 3 },
+            animationSpec = tween(400, delayMillis = 200)
+        ) + fadeIn(tween(400, delayMillis = 200)),
+        exit = slideOutVertically() + fadeOut()
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Pruebas",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                hoveredElevation = 4.dp
             )
-
-        }
-
-        if (tiposPrueba.isEmpty()) {
-            Card(
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
+                    .padding(20.dp)
+                    .semantics {
+                        contentDescription = if (tiposPrueba.isEmpty()) {
+                            "Sección de pruebas, sin pruebas agregadas"
+                        } else {
+                            "Sección de pruebas, ${tiposPrueba.size} pruebas agregadas"
+                        }
+                    },
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Assignment,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "PRUEBAS",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    FilledIconButton(
+                        onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showDialog = true
+                        },
+                        modifier = Modifier
+                            .semantics {
+                                contentDescription = "Agregar nueva prueba"
+                            },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                if (tiposPrueba.isEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Assignment,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No hay pruebas agregadas",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Toca + para agregar una",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(scrollState)
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        tiposPrueba.forEachIndexed { index, tipo ->
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = scaleIn(
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    ),
+                                    initialScale = 0.8f
+                                ) + fadeIn(tween(300, delayMillis = index * 50))
+                            ) {
+                                TipoPruebaCard(
+                                    tipoPrueba = tipo,
+                                    modifier = Modifier.width(180.dp),
+                                    onEdit = {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        tipoPruebaSeleccionado = tipo
+                                    },
+                                    onDelete = {
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onEliminarTipoPrueba(tipo)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = { onScreenSelected("AgregarCalificacion") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    enabled = tiposPrueba.isNotEmpty(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (tiposPrueba.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                        contentColor = if (tiposPrueba.isNotEmpty()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
                     Text(
-                        text = "No hay pruebas agregadas",
+                        text = if (tiposPrueba.isNotEmpty()) "Agregar calificación" else "Agregue una prueba primero",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         textAlign = TextAlign.Center
                     )
                 }
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(scrollState)
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                tiposPrueba.forEach { tipo ->
-                    TipoPruebaCard(
+
+                DialogoAgregarPrueba(
+                    showDialog = showDialog,
+                    onDismiss = { showDialog = false },
+                    onConfirm = { prueba ->
+                        onAgregarTipoPrueba(prueba)
+                        showDialog = false
+                    }
+                )
+
+                tipoPruebaSeleccionado?.let { tipo ->
+                    DialogoEditarPrueba(
                         tipoPrueba = tipo,
-                        modifier = Modifier.width(200.dp),
-                        onEdit = { tipoPruebaSeleccionado = tipo },
-                        onDelete = { onEliminarTipoPrueba(tipo) }
+                        onDismiss = { tipoPruebaSeleccionado = null },
+                        onConfirm = {
+                            onEditarTipoPrueba(it)
+                            tipoPruebaSeleccionado = null
+                        }
                     )
                 }
             }
-        }
-        Button(
-            onClick = { showDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary // estándar
-            )
-        ) {
-            Text("Agregar Prueba")
-        }
-
-        Button(
-            onClick = { onScreenSelected("AgregarCalificacion") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = tiposPrueba.isNotEmpty(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (tiposPrueba.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline // estándar
-            )
-        ) {
-            Text(
-                text = if (tiposPrueba.isNotEmpty())
-                    "Agregar calificación"
-                else
-                    "Agregue una prueba primero",
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-        DialogoAgregarPrueba(
-            showDialog = showDialog,
-            onDismiss = { showDialog = false },
-            onConfirm = { prueba ->
-                onAgregarTipoPrueba(prueba)
-                showDialog = false
-            }
-        )
-
-        tipoPruebaSeleccionado?.let { tipo ->
-            DialogoEditarPrueba(
-                tipoPrueba = tipo,
-                onDismiss = { tipoPruebaSeleccionado = null },
-                onConfirm = {
-                    onEditarTipoPrueba(it)
-                    tipoPruebaSeleccionado = null
-                }
-            )
         }
     }
 }
