@@ -108,6 +108,10 @@ fun DetalleCursoScreen(
     val tipoPruebaViewModel: TipoPruebaViewModel = viewModel(factory = TipoPruebaViewModelFactory(tipoPruebaRepository))
     val tiposPrueba by tipoPruebaViewModel.tiposPrueba.collectAsState()
 
+    // Validación extra: filtrar visualmente por cursoId
+    val horariosFiltrados = horarios.filter { it.idCurso == cursoId }
+    val tiposPruebaFiltrados = tiposPrueba.filter { it.idCurso == cursoId }
+    val hayDatosFueraDeCurso = horarios.any { it.idCurso != cursoId } || tiposPrueba.any { it.idCurso != cursoId }
     // Estados para animaciones
     var isVisible by remember { mutableStateOf(false) }
     var curso by remember { mutableStateOf<Curso?>(null) }
@@ -176,7 +180,7 @@ fun DetalleCursoScreen(
                 )
 
                 HorarioSection(
-                    horarios = horarios,
+                    horarios = horariosFiltrados,
                     onAgregarHorario = { horarioState ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                         val nuevoHorario = Horario(
@@ -200,7 +204,7 @@ fun DetalleCursoScreen(
                 )
 
                 PruebasSection(
-                    tiposPrueba = tiposPrueba,
+                    tiposPrueba = tiposPruebaFiltrados,
                     onAgregarTipoPrueba = { pruebaDialogState ->
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                         val nuevoTipoPrueba = TipoPrueba(
@@ -223,6 +227,20 @@ fun DetalleCursoScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                if (hayDatosFueraDeCurso) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Text(
+                            text = "¡Advertencia: Se detectaron datos que no corresponden al curso seleccionado!",
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
@@ -514,7 +532,7 @@ private fun PruebasSection(
             onClick = { showDialog = true },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3355ff)
+                containerColor = MaterialTheme.colorScheme.primary // estándar
             )
         ) {
             Text("Agregar Prueba")
@@ -523,9 +541,9 @@ private fun PruebasSection(
         Button(
             onClick = { onScreenSelected("AgregarCalificacion") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = tiposPrueba.isNotEmpty(), // Deshabilita el botón si no hay pruebas
+            enabled = tiposPrueba.isNotEmpty(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (tiposPrueba.isNotEmpty()) Color(0xFF3355ff) else Color.Gray
+                containerColor = if (tiposPrueba.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline // estándar
             )
         ) {
             Text(
@@ -533,7 +551,7 @@ private fun PruebasSection(
                     "Agregar calificación"
                 else
                     "Agregue una prueba primero",
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
         DialogoAgregarPrueba(
