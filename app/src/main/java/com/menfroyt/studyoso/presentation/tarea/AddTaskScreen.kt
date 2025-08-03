@@ -168,20 +168,10 @@ fun AddTaskScreen(
         modifier = modifier.fillMaxSize()
             .background(backgroundGradient)
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 4.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -602,8 +592,11 @@ fun AddTaskScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             )
+
                         }
+
                     }
+
                     
                     AnimatedVisibility(
                         visible = isLoading,
@@ -620,10 +613,6 @@ fun AddTaskScreen(
             }
         }
         
-        // SnackbarHost para mostrar mensajes
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+
     }
-}
+

@@ -125,20 +125,10 @@ fun AgregarCursosScreen(
         modifier = modifier.fillMaxSize()
             .background(backgroundGradient)
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 4.dp)
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -485,6 +475,10 @@ fun AgregarCursosScreen(
                     }
                 }
             }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
         }
 
         // Dialog de selección de color mejorado
@@ -501,12 +495,9 @@ fun AgregarCursosScreen(
         }
         
         // SnackbarHost para mostrar mensajes
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+
     }
-}
+
 
 
 

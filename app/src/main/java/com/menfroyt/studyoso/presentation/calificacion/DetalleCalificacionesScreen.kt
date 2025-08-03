@@ -9,8 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,6 +35,7 @@ import com.menfroyt.studyoso.data.entities.TipoPrueba
 import com.menfroyt.studyoso.data.repositories.CalificacionRepository
 import com.menfroyt.studyoso.data.repositories.CursoRepository
 import com.menfroyt.studyoso.data.repositories.TipoPruebaRepository
+import androidx.core.graphics.toColorInt
 
 data class PruebaDialogState(
     val tipo: String = "",
@@ -61,12 +64,14 @@ fun DetalleCalificacionesScreen(
     val cursoViewModel: CursoViewModel = viewModel(factory = CursoViewModelFactory(cursoRepository))
     var nombreCurso by remember { mutableStateOf<String>("") }
     var showDialogTipoPrueba by remember { mutableStateOf(false) }
+    var colorCurso by remember { mutableStateOf<String>("") }
 
     LaunchedEffect(cursoId) {
         tipoPruebaViewModel.cargarTiposPorCurso(cursoId)
         calificacionViewModel.cargarCalificacionesPorCurso(cursoId)
         val curso = cursoViewModel.getCursoById(cursoId)
         nombreCurso = curso?.nombreCurso ?: ""
+        colorCurso = curso?.color?: "#FFFFFF"
     }
 
     val calPorTipo = tiposPrueba.associateWith { tipo ->
@@ -90,75 +95,58 @@ fun DetalleCalificacionesScreen(
     )
 
     Box(
-        modifier = modifier.fillMaxSize()
-        .background(backgroundGradient)
+        modifier = modifier
+            .fillMaxSize()
+            .background(backgroundGradient)
     ) {
-        Scaffold(
-            floatingActionButton = {
-                if (tiposPrueba.isNotEmpty()) {  // Solo muestra el FAB si hay tipos de prueba
-                    FloatingActionButton(
-                        onClick = { onScreenSelected("AgregarCalificacion") },
-                        containerColor = Color(0xFF3355ff),
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Agregar Calificación",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            }
-        ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundGradient)
+                .verticalScroll(rememberScrollState())
+
+        ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(backgroundGradient)
-                    .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
+                    .padding(top = 16.dp)
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surface
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth().padding(start = 16.dp, end = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Row(
+                    IconButton(
+                        onClick = { onScreenSelected("ListCalificaciones") },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = { onScreenSelected("ListCalificaciones") },
-                            modifier = Modifier
-                                .size(40.dp)  // Aumentado para mejor toque
-                                .background(
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                    shape = CircleShape
-                                )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBackIosNew,
-                                contentDescription = "Regresar a lista",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp)  // Tamaño del icono más visible
+                            .size(48.dp)
+                            .background(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                shape = CircleShape
                             )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))  // Más espacio entre elementos
-
-                        Text(
-                            text = nombreCurso,
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            modifier = Modifier
-                                .weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Text(
+                        text = nombreCurso,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
+
 
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -205,12 +193,21 @@ fun DetalleCalificacionesScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("Calificaciones Actuales", style = MaterialTheme.typography.titleMedium)
-                            tiposPrueba.forEach { tipo ->
-                                NotaItem(
-                                    tipo.nombreTipo,
-                                    *(calPorTipo[tipo]?.map { (it.calificacionObtenida?.toString() ?: "-") }?.toTypedArray() ?: arrayOf()),
-                                    emoji = "⭐"
+                            if (tiposPrueba.isEmpty()) {
+                                Text(
+                                    text = "No hay pruebas disponibles. Agregue una prueba para continuar.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(vertical = 8.dp)
                                 )
+                            } else {
+                                tiposPrueba.forEach { tipo ->
+                                    NotaItem(
+                                        tipo.nombreTipo,
+                                        *(calPorTipo[tipo]?.map { (it.calificacionObtenida?.toString() ?: "-") }?.toTypedArray() ?: arrayOf()),
+                                        emoji = "⭐"
+                                    )
+                                }
                             }
                             Button(
                                 onClick = { onScreenSelected("SimuladoCalificacion/$cursoId") },
@@ -218,13 +215,18 @@ fun DetalleCalificacionesScreen(
                                     .fillMaxWidth()
                                     .padding(top = 16.dp),
                                 shape = RoundedCornerShape(12.dp),
+                                enabled = tiposPrueba.isNotEmpty(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF3355ff),
-                                    contentColor = Color.White
+                                    containerColor = if (tiposPrueba.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                    contentColor = if (tiposPrueba.isNotEmpty()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                 ),
-                                border = BorderStroke(1.dp, Color(0xFF3355ff))
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                             ) {
-                                Text("Simulador de notas")
+                                Text(
+                                    text = if (tiposPrueba.isNotEmpty()) "Simulador de notas" else "Agregue una prueba primero",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
                     }
@@ -272,6 +274,22 @@ fun DetalleCalificacionesScreen(
                     }
                 }
             }
+        }
+        if (tiposPrueba.isNotEmpty()) {
+                FloatingActionButton(
+                    onClick = { onScreenSelected("AgregarCalificacion") },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Agregar Calificación",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
         }
     }
 
@@ -412,8 +430,8 @@ private fun NotaItem(titulo: String, vararg notas: String, emoji: String) {
             notas.forEachIndexed { index, nota ->
                 ElevatedCard(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(18.dp)
-                    , colors = CardDefaults.cardColors(
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                 ) {
